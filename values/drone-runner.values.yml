@@ -1,0 +1,135 @@
+image:
+  repository: drone/drone-runner-kube
+  tag: 1.0.0-beta.1
+  pullPolicy: IfNotPresent
+
+## If you need to pull images from a private Docker image repository, pass in the name
+## of a Kubernetes Secret that contains the needed secret. For more details, see:
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+##
+imagePullSecrets: []
+# - name: "image-pull-secret"
+
+## For small or experimental deployments of the Kubernetes runner, 1 replica will suffice.
+## For production cases, 2-3 are recommended. This does not grant additional parallelism,
+## but does ensure that upgrades, config changes, and disruptions are handled more gracefully.
+replicaCount: 1
+
+## When the runner receives a SIGTERM/SIGINT (config update, upgrade, etc), it will wait until
+## all jobs that particular pod has spawned complete. It is for this reason that you'll want
+## to make sure that this value is longer than your longest job.
+terminationGracePeriodSeconds: 3600
+
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+## Add extra annotations to the Kubernetes runner pods here.
+##
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: false
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - "/"
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+## If you'd like to force the Drone runner to run on a specific node or set of nodes,
+## set a selector here.
+##
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+## If you'd like to make additional files or volumes available to the runner, declare additional
+## Volumes here per the Pod spec's "volumes" section.
+## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+##
+extraVolumes: []
+## If you have declared extra volumes, mount them here, per the Pod Container's
+## "volumeMounts" section.
+##
+extraVolumeMounts: []
+
+## If you'd like to provide your own Kubernetes Secret object instead of passing your values
+## in un-encrypted, pass in the name of a created + populated Secret in the same Namespace
+## as the Kubernetes runner. All secrets within this configmap will be mounted as environment
+## variables, with each key/value mapping to a corresponding environment variable on the
+## Kubernetes runner.
+##
+extraSecretNamesForEnvFrom:
+  - drone-secrets
+
+## Each namespace listed below will be configured such that the runner can run build Pods in
+## it. This comes in the form of a Role and a RoleBinding. If you change env.DRONE_NAMESPACE_DEFAULT
+## or the other DRONE_NAMESPACE_* variables, make sure to update this list to include all
+## namespaces.
+rbac:
+  buildNamespaces:
+    - default
+
+## The keys within the "env" map are mounted as environment variables on the Kubernetes runner pod.
+## See the full reference of Kubernetes runner environment variables here:
+## Ref: https://kube-runner.docs.drone.io/installation/reference/
+##
+env:
+  ## REQUIRED: Set the secret secret token that the Kubernetes runner and its runners will use
+  ## to authenticate. This is commented out in order to leave you the ability to set the
+  ## key via a separately provisioned secret (see existingSecretName above).
+  ## Ref: https://kube-runner.docs.drone.io/installation/reference/drone-rpc-secret/
+  ##
+  ## REQUIRED: Set the user-visible Drone hostname, sans protocol.
+  ## Ref: https://docs.drone.io/installation/reference/drone-server-host/
+  ##
+  DRONE_SERVER_HOST: "drone.patrick.tools"
+  ## The protocol to pair with the value in DRONE_SERVER_HOST (http or https).
+  ## Ref: https://docs.drone.io/installation/reference/drone-server-proto/
+  ##
+  DRONE_SERVER_PROTO: https
+  ## REQUIRED: Set the secret secret token that the Drone server and its Runners will use
+  ## to authenticate. This is commented out in order to leave you the ability to set the
+  ## key via a separately provisioned secret (see existingSecretName above).
+  ## Ref: https://docs.drone.io/installation/reference/drone-rpc-secret/
+  ##
+  DRONE_RPC_SECRET: 262b6fe1c7b92bba99a9d6bec40306c0
+
+  ## Determines the default Kubernetes namespace for Drone builds to run in.
+  ## Ref: https://kube-runner.docs.drone.io/installation/reference/drone-namespace-default/
+  ##
+  DRONE_NAMESPACE_DEFAULT: drone

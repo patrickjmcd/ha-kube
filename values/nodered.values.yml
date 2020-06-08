@@ -1,0 +1,48 @@
+# Default values for node-red.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# upgrade strategy type (e.g. Recreate or RollingUpdate)
+strategyType: RollingUpdate
+
+image:
+  repository: nodered/node-red
+  tag: latest
+  pullPolicy: IfNotPresent
+
+timezone: "America/Chicago"
+
+persistence:
+  enabled: true
+  ## node-red data Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  # storageClass: "-"
+  ##
+  ## If you want to reuse an existing claim, you can pass the name of the PVC using
+  ## the existingClaim variable
+  existingClaim: nfs-data-nodered-claim
+  accessMode: ReadWriteOnce
+  size: 500Mi
+  ## When mounting the data volume you may specify a subPath
+  # subPath: /configs/node-red
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+  path: /
+  hosts:
+    - nodered.patrick.tools
+  tls:
+    - hosts:
+        - "nodered.patrick.tools" # Host to access nextcloud
+      secretName: "nodered-prod-tls" # Name of the certifciate (see kubectl get certificate -A)

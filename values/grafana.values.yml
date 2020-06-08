@@ -1,0 +1,235 @@
+rbac:
+  create: true
+  pspEnabled: true
+  pspUseAppArmor: true
+  namespaced: false
+  extraRoleRules: []
+  # - apiGroups: []
+  #   resources: []
+  #   verbs: []
+  extraClusterRoleRules: []
+  # - apiGroups: []
+  #   resources: []
+  #   verbs: []
+serviceAccount:
+  create: true
+  name:
+  nameTest:
+#  annotations:
+
+replicas: 1
+
+## See `kubectl explain poddisruptionbudget.spec` for more
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+podDisruptionBudget: {}
+#  minAvailable: 1
+#  maxUnavailable: 1
+
+## See `kubectl explain deployment.spec.strategy` for more
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+deploymentStrategy:
+  type: RollingUpdate
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 60
+  timeoutSeconds: 30
+  failureThreshold: 10
+
+## Use an alternate scheduler, e.g. "stork".
+## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+##
+# schedulerName: "default-scheduler"
+
+image:
+  repository: grafana/grafana
+  tag: latest
+  pullPolicy: IfNotPresent
+
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistrKeySecretName
+
+testFramework:
+  enabled: false
+  image: "bats/bats"
+  tag: "v1.1.0"
+  imagePullPolicy: IfNotPresent
+  securityContext: {}
+
+securityContext:
+  runAsUser: 472
+  runAsGroup: 472
+  fsGroup: 472
+
+extraConfigmapMounts:
+  []
+  # - name: certs-configmap
+  #   mountPath: /etc/grafana/ssl/
+  #   subPath: certificates.crt # (optional)
+  #   configMap: certs-configmap
+  #   readOnly: true
+
+extraEmptyDirMounts:
+  []
+  # - name: provisioning-notifiers
+  #   mountPath: /etc/grafana/provisioning/notifiers
+
+## Assign a PriorityClassName to pods if set
+# priorityClassName:
+
+downloadDashboardsImage:
+  repository: curlimages/curl
+  tag: 7.70.0
+  pullPolicy: IfNotPresent
+
+downloadDashboards:
+  env: {}
+  resources: {}
+
+## Pod Annotations
+# podAnnotations: {}
+
+## Pod Labels
+# podLabels: {}
+
+podPortName: grafana
+
+## Deployment annotations
+# annotations: {}
+
+## Expose the grafana service to be accessed from outside the cluster (LoadBalancer service).
+## or access it from within the cluster (ClusterIP service). Set the service type and the port to serve it.
+## ref: http://kubernetes.io/docs/user-guide/services/
+##
+service:
+  type: ClusterIP
+  port: 80
+  targetPort:
+    3000
+    # targetPort: 4181 To be used with a proxy extraContainer
+  annotations: {}
+  labels: {}
+  portName: service
+
+extraExposePorts:
+  []
+  # - name: keycloak
+  #   port: 8080
+  #   targetPort: 8080
+  #   type: ClusterIP
+
+ingress:
+  enabled: true
+  # Values can be templated
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+  path: /
+  hosts:
+    - grafana.patrick.tools
+  tls:
+    - secretName: "grafana-prod-tls"
+      hosts:
+        - grafana.patrick.tools
+
+resources: {}
+#  limits:
+#    cpu: 100m
+#    memory: 128Mi
+#  requests:
+#    cpu: 100m
+#    memory: 128Mi
+
+## Enable persistence using Persistent Volume Claims
+## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  type: pvc
+  enabled: true
+  # storageClassName: default
+  accessModes:
+    - ReadWriteOnce
+  size: 100Mi
+  # annotations: {}
+  finalizers: {}
+  # subPath: ""
+  existingClaim: nfs-config-grafana-claim
+
+initChownData:
+  ## If false, data ownership will not be reset at startup
+  ## This allows the prometheus-server to be run with an arbitrary user
+  ##
+  enabled: true
+
+  ## initChownData container image
+  ##
+  image:
+    repository: busybox
+    tag: "1.31.1"
+    pullPolicy: IfNotPresent
+
+# Administrator credentials when not using an existing secret (see below)
+adminUser: admin
+# adminPassword: strongpassword
+
+# Use an existing secret for the admin user.
+admin:
+  existingSecret: "grafana-auth"
+  userKey: grafana-user
+  passwordKey: grafana-password
+
+## Grafana's primary configuration
+## NOTE: values in map will be converted to ini format
+## ref: http://docs.grafana.org/installation/configuration/
+##
+grafana.ini:
+  paths:
+    data: /var/lib/grafana/data
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+## grafana Authentication can be enabled with the following values on grafana.ini
+# server:
+# The full public facing url you use in browser, used for redirects and emails
+#    root_url:
+# https://grafana.com/docs/grafana/latest/auth/github/#enable-github-in-grafana
+# auth.github:
+#    enabled: false
+#    allow_sign_up: false
+#    scopes: user:email,read:org
+#    auth_url: https://github.com/login/oauth/authorize
+#    token_url: https://github.com/login/oauth/access_token
+#    api_url: https://github.com/user
+#    team_ids:
+#    allowed_organizations:
+#    client_id:
+#    client_secret:
+## LDAP Authentication can be enabled with the following values on grafana.ini
+## NOTE: Grafana will fail to start if the value for ldap.toml is invalid
+# auth.ldap:
+#   enabled: true
+#   allow_sign_up: true
+#   config_file: /etc/grafana/ldap.toml
+
+## Grafana's LDAP configuration
+## Templated by the template in _helpers.tpl
+## NOTE: To enable the grafana.ini must be configured with auth.ldap.enabled
+## ref: http://docs.grafana.org/installation/configuration/#auth-ldap
+## ref: http://docs.grafana.org/installation/ldap/#configuration

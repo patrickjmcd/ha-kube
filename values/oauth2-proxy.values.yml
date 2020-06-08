@@ -1,0 +1,41 @@
+config:
+  existingSecret: oauth2-proxy-creds
+
+extraArgs:
+  whitelist-domain: .patrick.tools
+  cookie-domain: .patrick.tools
+  provider: google
+
+image:
+  repository: "quay.io/pusher/oauth2_proxy"
+  tag: latest
+  pullPolicy: "IfNotPresent"
+
+authenticatedEmailsFile:
+  enabled: true
+  restricted_access: |-
+    patrickjmcd@gmail.com
+    mcdonagh.cari@gmail.com
+
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - sso.patrick.tools
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    - secretName: oauth2-proxy-https-cert
+      hosts:
+        - sso.patrick.tools
+
+# Additionally authenticate against a htpasswd file. Entries must be created with "htpasswd -s" for SHA encryption.
+# Alternatively supply an existing secret which contains the required information.
+htpasswdFile:
+  enabled: false
+  entries: {}
+  # One row for each user
+  # example:
+  # entries:
+  #  - testuser:{SHA}EWhzdhgoYJWy0z2gyzhRYlN9DSiv
