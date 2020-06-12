@@ -1,0 +1,40 @@
+- hosts: k3s_servers,k3s_firstnode
+  become: yes
+  tasks:
+    - name: Check for uninstaller on server nodes
+      stat:
+        path: /usr/local/bin/k3s-uninstall.sh
+      register: st
+    - name: Uninstall k3s on server nodes
+      shell: /usr/local/bin/k3s-uninstall.sh
+      when: st.stat.exists
+    - name: Reboot the machine
+      when: st.stat.exists
+      reboot:
+
+- hosts: k3s_agents
+  become: yes
+  tasks:
+    - name: Check for uninstaller on worker nodes
+      stat:
+        path: /usr/local/bin/k3s-agent-uninstall.sh
+      register: st
+    - name: Uninstall k3s on worker nodes
+      shell: /usr/local/bin/k3s-agent-uninstall.sh
+      when: st.stat.exists
+    - name: Reboot the machine
+      when: st.stat.exists
+      reboot:
+
+- hosts: localhost
+  connection: local
+  vars:
+    ansible_python_interpreter: "/usr/local/bin/python3"
+  tasks:
+    - name: Clear postgres database
+      postgresql_query:
+        login_host: 192.168.1.250
+        db: kube
+        login_user: kube
+        login_password: kube
+        query: DROP TABLE kine

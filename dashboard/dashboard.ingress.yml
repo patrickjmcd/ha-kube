@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "kubernetes-dashboard-ingress" # Name of the ingress (see kubectl get ingress -A)
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+    # kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}')
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $token $upstream_http_authorization;
+      proxy_set_header Authorization "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6InJmbE41ak1IYkVEeDBkSFVYZU1pSDNXREZZazFBZXVUNkMyb0tBanJNNHcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTkyZHM4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI4Mzg4YjYwYy1iNjY1LTQ0OTctOGVlOC1hM2ZjZjY3YWY2NGQiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZXJuZXRlcy1kYXNoYm9hcmQ6YWRtaW4tdXNlciJ9.acngTszPAzmjWUU8DhxYNYgROIsv8A2H2z0O9v4DsLlHhdpDv_AnxH8w_dFiB3WJf-FPzJcKLWBMmuAPzFYGDkHYgb3x2Ih6rlFE096w8Z2HfJ6UdgXALKi_lRnDZqLVhW5uKnY9evbPCHVMjwgUbrXa9SxyDLXPfwHsuQ9lKSOariEKbLcstkVxHTi7XgW2GR86ZbFxh3VHGRv_0EWjtHkmm0kBtGOjsChjMvvAETXACz5dOZFTPEqEL0CVcG3iZVMUrFF0xcYx_nAi6D1nTTsDVuF2uCYMMLu616WQjyWiVFTCIt0b4yinLEyKFvjJM8ZPxQ6k-bWYWpP3jXwsrQ";
+      proxy_pass_header Authorization;
+spec:
+  tls:
+    - hosts:
+        - "k8s.patrick.tools" # Host to access nextcloud
+      secretName: "dashboard-prod-tls" # Name of the certifciate (see kubectl get certificate -A)
+  rules:
+    - host: "k8s.patrick.tools" # Host to access nextcloud
+      http:
+        paths:
+          - path: / # We will access NextCloud via the URL https://nextcloud.<domain.com>/
+            backend:
+              serviceName: "kubernetes-dashboard" # Mapping to the service (see kubectl get services -n nextcloud)
+              servicePort: 80 # Mapping to the port (see kubectl get services -n nextcloud)

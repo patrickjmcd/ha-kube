@@ -91,10 +91,10 @@ releases:
 
   # Open-FaaS
 
-  - name: openfaas
-    chart: openfaas/openfaas
-    values:
-      - values/openfaas.values.yml
+  # - name: openfaas
+  #   chart: openfaas/openfaas
+  #   values:
+  #     - values/openfaas.values.yml
 
   # Drone
   - name: drone
@@ -108,3 +108,15 @@ releases:
     namespace: drone
     values:
       - values/drone-runner.values.yml
+
+  - name: registry
+    chart: stable/docker-registry
+    namespace: kube-system
+    values:
+      - values/registry.values.yml
+
+  - name: prometheus
+    chart: stable/prometheus
+    namespace: monitoring
+    values:
+      - values/prometheus.values.yml

@@ -40,7 +40,7 @@ alertmanager:
   ##
   image:
     repository: prom/alertmanager
-    tag: v0.20.0
+    tag: latest
     pullPolicy: IfNotPresent
 
   ## alertmanager priorityClassName
@@ -101,6 +101,9 @@ alertmanager:
     annotations:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
       - alertmanager.patrick.tools
@@ -126,7 +129,8 @@ alertmanager:
   ## Node labels for alertmanager pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
-  nodeSelector: {}
+  nodeSelector:
+    beta.kubernetes.io/arch: amd64
 
   ## Pod affinity
   ##
@@ -376,7 +380,13 @@ kubeStateMetrics:
 ## kube-state-metrics sub-chart configurable values
 ## Please see https://github.com/helm/charts/tree/master/stable/kube-state-metrics
 ##
-# kube-state-metrics:
+kube-state-metrics:
+  image:
+    tag: latest
+    pullPolicy: Always
+
+  nodeSelector:
+    beta.kubernetes.io/arch: amd64
 
 nodeExporter:
   ## If false, node-exporter will not be installed
@@ -399,8 +409,8 @@ nodeExporter:
   ##
   image:
     repository: prom/node-exporter
-    tag: v0.18.1
-    pullPolicy: IfNotPresent
+    tag: latest
+    pullPolicy: Always
 
   ## Specify if a Pod Security Policy for node-exporter must be created
   ## Ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
@@ -531,8 +541,8 @@ server:
   ##
   image:
     repository: prom/prometheus
-    tag: v2.18.1
-    pullPolicy: IfNotPresent
+    tag: latest
+    pullPolicy: Always
 
   ## prometheus server priorityClassName
   ##
@@ -655,6 +665,9 @@ server:
     annotations:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
       - prometheus.patrick.tools
@@ -686,7 +699,8 @@ server:
   ## Node labels for Prometheus server pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   ##
-  nodeSelector: {}
+  nodeSelector:
+    beta.kubernetes.io/arch: amd64
 
   ## Pod affinity
   ##
@@ -904,8 +918,8 @@ pushgateway:
   ##
   image:
     repository: prom/pushgateway
-    tag: v1.0.1
-    pullPolicy: IfNotPresent
+    tag: latest
+    pullPolicy: Always
 
   ## pushgateway priorityClassName
   ##
@@ -926,6 +940,9 @@ pushgateway:
     annotations:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
       - pushgateway.patrick.tools
@@ -1070,14 +1087,16 @@ pushgateway:
 ##
 alertmanagerFiles:
   alertmanager.yml:
-    global: {}
-    # slack_api_url: ''
+    global:
+      slack_api_url: "https://hooks.slack.com/services/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"
 
     receivers:
       - name: default-receiver
-        # slack_configs:
-        #  - channel: '@you'
-        #    send_resolved: true
+        slack_configs:
+          - send_resolved: true
+            username: "alertbot"
+            channel: "#server-alerts"
+            text: "{{ range .Alerts }}*Summary:* {{ .Annotations.summary }}\n*Description:* {{ .Annotations.description }}\n----\n{{ end }}"
 
     route:
       group_wait: 10s
@@ -1090,18 +1109,338 @@ alertmanagerFiles:
 serverFiles:
   ## Alerts configuration
   ## Ref: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
-  alerting_rules.yml: {}
-  # groups:
-  #   - name: Instances
-  #     rules:
-  #       - alert: InstanceDown
-  #         expr: up == 0
-  #         for: 5m
-  #         labels:
-  #           severity: page
-  #         annotations:
-  #           description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.'
-  #           summary: 'Instance {{ $labels.instance }} down'
+  alerting_rules.yml:
+    groups:
+      - name: Instances
+        rules:
+          - alert: InstanceDown
+            expr: up == 0
+            for: 5m
+            labels:
+              severity: page
+            annotations:
+              description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+              summary: "Instance {{ $labels.instance }} down"
+      - name: Prometheus
+        rules:
+          - alert: PrometheusConfigurationReloadFailure
+            expr: prometheus_config_last_reload_successful != 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus configuration reload failure (instance {{ $labels.instance }})"
+              description: "Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: PrometheusAlertmanagerConfigurationReloadFailure
+            expr: alertmanager_config_last_reload_successful != 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus AlertManager configuration reload failure (instance {{ $labels.instance }})"
+              description: "AlertManager configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: PrometheusAlertmanagerE2eDeadManSwitch
+            expr: vector(1)
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prometheus AlertManager E2E dead man switch (instance {{ $labels.instance }})"
+              description: "Prometheus DeadManSwitch is an always-firing alert. It's used as an end-to-end test of Prometheus through the Alertmanager.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
+          - alert: PrometheusNotConnectedToAlertmanager
+            expr: prometheus_notifications_alertmanagers_discovered < 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prometheus not connected to alertmanager (instance {{ $labels.instance }})"
+              description: "Prometheus cannot connect the alertmanager\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: PrometheusRuleEvaluationFailures
+            expr: increase(prometheus_rule_evaluation_failures_total[3m]) > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prometheus rule evaluation failures (instance {{ $labels.instance }})"
+              description: "Prometheus encountered {{ $value }} rule evaluation failures, leading to potentially ignored alerts.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: PrometheusAlertmanagerNotificationFailing
+            expr: rate(alertmanager_notifications_failed_total[1m]) > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Prometheus AlertManager notification failing (instance {{ $labels.instance }})"
+              description: "Alertmanager is failing sending notifications\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: PrometheusLargeScrape
+            expr: increase(prometheus_target_scrapes_exceeded_sample_limit_total[10m]) > 10
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Prometheus large scrape (instance {{ $labels.instance }})"
+              description: "Prometheus has many scrapes that exceed the sample limit\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - name: nodes
+        rules:
+          - alert: HostOutOfMemory
+            expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host out of memory (instance {{ $labels.instance }})"
+              description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostMemoryUnderMemoryPressure
+            expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host memory under memory pressure (instance {{ $labels.instance }})"
+              description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostUnusualNetworkThroughputIn
+            expr: sum by (instance) (irate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host unusual network throughput in (instance {{ $labels.instance }})"
+              description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostUnusualNetworkThroughputOut
+            expr: sum by (instance) (irate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host unusual network throughput out (instance {{ $labels.instance }})"
+              description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostOutOfDiskSpace
+            expr: (node_filesystem_avail_bytes{mountpoint="/rootfs"}  * 100) / node_filesystem_size_bytes{mountpoint="/rootfs"} < 10
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host out of disk space (instance {{ $labels.instance }})"
+              description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostUnusualDiskReadLatency
+            expr: rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 100
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host unusual disk read latency (instance {{ $labels.instance }})"
+              description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostUnusualDiskWriteLatency
+            expr: rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 100
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host unusual disk write latency (instance {{ $labels.instance }})"
+              description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostHighCpuLoad
+            expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host high CPU load (instance {{ $labels.instance }})"
+              description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostSwapIsFillingUp
+            expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host swap is filling up (instance {{ $labels.instance }})"
+              description: "Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostSystemdServiceCrashed
+            expr: node_systemd_unit_state{state="failed"} == 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host SystemD service crashed (instance {{ $labels.instance }})"
+              description: "SystemD service crashed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostPhysicalComponentTooHot
+            expr: node_hwmon_temp_celsius > 75
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host physical component too hot (instance {{ $labels.instance }})"
+              description: "Physical hardware component too hot\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: HostOomKillDetected
+            expr: increase(node_vmstat_oom_kill[5m]) > 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Host OOM kill detected (instance {{ $labels.instance }})"
+              description: "OOM kill detected\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+      - name: kubernetes
+        rules:
+          - alert: KubernetesNodeReady
+            expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes Node ready (instance {{ $labels.instance }})"
+              description: "Node {{ $labels.node }} has been unready for a long time\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesMemoryPressure
+            expr: kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes memory pressure (instance {{ $labels.instance }})"
+              description: "{{ $labels.node }} has MemoryPressure condition\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesDiskPressure
+            expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes disk pressure (instance {{ $labels.instance }})"
+              description: "{{ $labels.node }} has DiskPressure condition\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesOutOfDisk
+            expr: kube_node_status_condition{condition="OutOfDisk",status="true"} == 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes out of disk (instance {{ $labels.instance }})"
+              description: "{{ $labels.node }} has OutOfDisk condition\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesJobFailed
+            expr: kube_job_status_failed > 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes Job failed (instance {{ $labels.instance }})"
+              description: "Job {{$labels.namespace}}/{{$labels.exported_job}} failed to complete\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesCronjobSuspended
+            expr: kube_cronjob_spec_suspend != 0
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes CronJob suspended (instance {{ $labels.instance }})"
+              description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is suspended\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesPersistentvolumeclaimPending
+            expr: kube_persistentvolumeclaim_status_phase{phase="Pending"} == 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes PersistentVolumeClaim pending (instance {{ $labels.instance }})"
+              description: "PersistentVolumeClaim {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is pending\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesVolumeOutOfDiskSpace
+            expr: kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes * 100 < 10
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes Volume out of disk space (instance {{ $labels.instance }})"
+              description: "Volume is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesPersistentvolumeError
+            expr: kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes PersistentVolume error (instance {{ $labels.instance }})"
+              description: "Persistent volume is in bad state\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesPodNotHealthy
+            expr: min_over_time(sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed",pod!~"cm-acme-http-solver.+"})[1h:]) > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes Pod not healthy (instance {{ $labels.instance }})"
+              description: "Pod has been in a non-ready state for longer than an hour.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesPodCrashLooping
+            expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 * 5 > 5
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes pod crash looping (instance {{ $labels.instance }})"
+              description: "Pod {{ $labels.pod }} is crash looping\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesReplicassetMismatch
+            expr: kube_replicaset_spec_replicas != kube_replicaset_status_ready_replicas
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes ReplicasSet mismatch (instance {{ $labels.instance }})"
+              description: "Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesDeploymentReplicasMismatch
+            expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes Deployment replicas mismatch (instance {{ $labels.instance }})"
+              description: "Deployment Replicas mismatch\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesCronjobTooLong
+            expr: time() - kube_cronjob_next_schedule_time > 3600
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes CronJob too long (instance {{ $labels.instance }})"
+              description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking more than 1h to complete.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesJobCompletion
+            expr: kube_job_spec_completions - kube_job_status_succeeded > 0 or kube_job_status_failed > 0
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes job completion (instance {{ $labels.instance }})"
+              description: "Kubernetes Job failed to complete\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesApiServerErrors
+            expr: sum(rate(apiserver_request_count{job="apiserver",code=~"^(?:5..)$"}[2m])) / sum(rate(apiserver_request_count{job="apiserver"}[2m])) * 100 > 3
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes API server errors (instance {{ $labels.instance }})"
+              description: "Kubernetes API server is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesApiClientErrors
+            expr: (sum(rate(rest_client_requests_total{code=~"(4|5).."}[2m])) by (instance, job) / sum(rate(rest_client_requests_total[2m])) by (instance, job)) * 100 > 1
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes API client errors (instance {{ $labels.instance }})"
+              description: "Kubernetes API client is experiencing high error rate\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesClientCertificateExpiresNextWeek
+            expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 7*24*60*60
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes client certificate expires next week (instance {{ $labels.instance }})"
+              description: "A client certificate used to authenticate to the apiserver is expiring next week.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesClientCertificateExpiresSoon
+            expr: apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 24*60*60
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Kubernetes client certificate expires soon (instance {{ $labels.instance }})"
+              description: "A client certificate used to authenticate to the apiserver is expiring in less than 24.0 hours.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+          - alert: KubernetesApiServerLatency
+            expr: histogram_quantile(0.99, sum(apiserver_request_latencies_bucket{verb!~"CONNECT|WATCHLIST|WATCH|PROXY"}) WITHOUT (instance, resource)) / 1e+06 > 1
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Kubernetes API server latency (instance {{ $labels.instance }})"
+              description: "Kubernetes API server has a 99th percentile latency of {{ $value }} seconds for {{ $labels.verb }} {{ $labels.resource }}.\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+
   ## DEPRECATED DEFAULT VALUE, unless explicitly naming your files, please use alerting_rules.yml
   alerts: {}
 
