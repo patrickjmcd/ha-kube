@@ -61,7 +61,7 @@ alertmanager:
   prefixURL: ""
 
   ## External URL which can access alertmanager
-  baseURL: "http://alertmanager.patrick.tools"
+  baseURL: "http://alertmanager.pmcd.io"
 
   ## Additional alertmanager container environment variable
   ## For instance to add a http_proxy
@@ -102,15 +102,15 @@ alertmanager:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
       nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
-      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
-      - alertmanager.patrick.tools
+      - alertmanager.pmcd.io
     tls:
       - secretName: "alertmanager-prod-tls"
         hosts:
-          - alertmanager.patrick.tools
+          - alertmanager.pmcd.io
 
   ## Alertmanager Deployment Strategy type
   # strategy:
@@ -666,15 +666,15 @@ server:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
       nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
-      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
-      - prometheus.patrick.tools
+      - prometheus.pmcd.io
     tls:
       - secretName: "prometheus-prod-tls"
         hosts:
-          - prometheus.patrick.tools
+          - prometheus.pmcd.io
 
   ## Server Deployment Strategy type
   # strategy:
@@ -825,9 +825,9 @@ server:
   ## Prometheus server readiness and liveness probe initial delay and timeout
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   ##
-  readinessProbeInitialDelay: 30
+  readinessProbeInitialDelay: 180
   readinessProbeTimeout: 30
-  readinessProbeFailureThreshold: 3
+  readinessProbeFailureThreshold: 10
   readinessProbeSuccessThreshold: 1
   livenessProbeInitialDelay: 30
   livenessProbeTimeout: 30
@@ -941,15 +941,15 @@ pushgateway:
       kubernetes.io/ingress.class: "nginx"
       cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
       nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-      nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
-      nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
-      - pushgateway.patrick.tools
+      - pushgateway.pmcd.io
     tls:
       - secretName: "pushgateway-prod-tls"
         hosts:
-          - pushgateway.patrick.tools
+          - pushgateway.pmcd.io
 
   ## Node tolerations for pushgateway scheduling to nodes with taints
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -1829,20 +1829,26 @@ serverFiles:
 # must be a string so you have to add a | after extraScrapeConfigs:
 # example adds prometheus-blackbox-exporter scrape config
 extraScrapeConfigs:
-  # - job_name: 'prometheus-blackbox-exporter'
-  #   metrics_path: /probe
-  #   params:
-  #     module: [http_2xx]
-  #   static_configs:
-  #     - targets:
-  #       - https://example.com
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: __param_target
-  #     - source_labels: [__param_target]
-  #       target_label: instance
-  #     - target_label: __address__
-  #       replacement: prometheus-blackbox-exporter:9115
+  # - job_name: "arm-temperature"
+  #   scrape_interval: 60s
+  #   kubernetes_sd_configs:
+  #     - role: service
+  #       label: "k8s-app=arm-exporter"
+
+# - job_name: 'prometheus-blackbox-exporter'
+#   metrics_path: /probe
+#   params:
+#     module: [http_2xx]
+#   static_configs:
+#     - targets:
+#       - https://example.com
+#   relabel_configs:
+#     - source_labels: [__address__]
+#       target_label: __param_target
+#     - source_labels: [__param_target]
+#       target_label: instance
+#     - target_label: __address__
+#       replacement: prometheus-blackbox-exporter:9115
 
 # Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
 # useful in H/A prometheus with different external labels but the same alerts

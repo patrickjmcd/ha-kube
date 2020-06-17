@@ -24,10 +24,10 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
   path: /
   hosts:
-    - nextcloud.patrick.tools
+    - nextcloud.pmcd.io
   tls:
     - hosts:
-        - "nextcloud.patrick.tools" # Host to access nextcloud
+        - "nextcloud.pmcd.io" # Host to access nextcloud
       secretName: "nextcloud-prod-tls" # Name of the certifciate (see kubectl get certificate -A)
 
 # Allow configuration of lifecycle hooks
@@ -38,7 +38,7 @@ lifecycle:
   # preStopCommand: []
 
 nextcloud:
-  host: nextcloud.patrick.tools
+  host: nextcloud.pmcd.io
   username: admin
   password: testpassword
   update: 0

@@ -2,14 +2,14 @@ config:
   existingSecret: oauth2-proxy-creds
 
 extraArgs:
-  whitelist-domain: .patrick.tools
-  cookie-domain: .patrick.tools
+  whitelist-domain: .pmcd.io,.patrick.tools
+  cookie-domain: .pmcd.io
   provider: google
 
 image:
   repository: "quay.io/pusher/oauth2_proxy"
-  tag: latest
-  pullPolicy: "IfNotPresent"
+  tag: "v5.1.0"
+  pullPolicy: "Always"
 
 authenticatedEmailsFile:
   enabled: true
@@ -21,14 +21,14 @@ ingress:
   enabled: true
   path: /
   hosts:
-    - sso.patrick.tools
+    - sso.pmcd.io
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
   tls:
     - secretName: oauth2-proxy-https-cert
       hosts:
-        - sso.patrick.tools
+        - sso.pmcd.io
 
 # Additionally authenticate against a htpasswd file. Entries must be created with "htpasswd -s" for SHA encryption.
 # Alternatively supply an existing secret which contains the required information.
@@ -39,3 +39,6 @@ htpasswdFile:
   # example:
   # entries:
   #  - testuser:{SHA}EWhzdhgoYJWy0z2gyzhRYlN9DSiv
+
+nodeSelector:
+  beta.kubernetes.io/arch: amd64

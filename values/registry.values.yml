@@ -34,10 +34,10 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "30720m" # Increase the size of the maximum allowed size of the client request body
   path: /
   hosts:
-    - registry.patrick.tools
+    - registry.pmcd.io
   tls:
     - hosts:
-        - "registry.patrick.tools" # Host to access nextcloud
+        - "registry.pmcd.io" # Host to access nextcloud
       secretName: "registry-prod-tls" # Name of the certifciate (see kubectl get certificate -A)
 
 resources:

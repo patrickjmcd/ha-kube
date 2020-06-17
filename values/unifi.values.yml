@@ -6,7 +6,7 @@
 strategyType: Recreate
 
 image:
-  repository: linuxserver/unifi-controller
+  repository: jacobalberty/unifi
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -165,23 +165,21 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-    nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
-    nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 
   path: /
   hosts:
-    - unifi.patrick.tools
+    - unifi.pmcd.io
   tls:
-    - secretName: "nzbget-prod-tls"
+    - secretName: "unifi-prod-tls"
       hosts:
-        - unifi.patrick.tools
+        - unifi.pmcd.io
 
 timezone: America/Chicago
 
 runAsRoot: false
-UID: 1026
-GID: 100
+# UID: 1026
+# GID: 100
 
 ## If you provide your own custom certificate in <unifi-data>/cert
 ## you can define the following parameters to configure the controller
@@ -273,7 +271,8 @@ resources:
   #  cpu: 100m
   #  memory: 128Mi
 
-nodeSelector: {}
+nodeSelector:
+  beta.kubernetes.io/arch: amd64
 
 tolerations: []
 

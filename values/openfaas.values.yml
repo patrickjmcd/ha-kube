@@ -136,19 +136,19 @@ ingress:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
     # nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-    # nginx.ingress.kubernetes.io/auth-url: "https://sso.patrick.tools/oauth2/auth"
-    # nginx.ingress.kubernetes.io/auth-signin: "https://sso.patrick.tools/oauth2/start?rd=https://$host$request_uri"
+    # nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+    # nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
 
   path: /
   hosts:
-    - host: faas.patrick.tools
+    - host: faas.pmcd.io
       serviceName: gateway
       servicePort: 8080
       path: /
   tls:
     - secretName: "openfaas-prod-tls"
       hosts:
-        - faas.patrick.tools
+        - faas.pmcd.io
 
 # ingressOperator (optional) – component to have specific FQDN and TLS for Functions
 # https://github.com/openfaas-incubator/ingress-operator

@@ -24,11 +24,11 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
   path: /
   hosts:
-    - ombi.patrick.tools
+    - ombi.pmcd.io
   tls:
     - secretName: "ombi-prod-tls"
       hosts:
-        - ombi.patrick.tools
+        - ombi.pmcd.io
 
 volumes:
   - name: config

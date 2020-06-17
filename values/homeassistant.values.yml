@@ -24,8 +24,8 @@ ingress:
     cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
   path: /
   hosts:
-    - ha.patrick.tools
+    - ha.pmcd.io
   tls:
     - hosts:
-        - "ha.patrick.tools" # Host to access nextcloud
+        - "ha.pmcd.io" # Host to access nextcloud
       secretName: "ha-prod-tls" # Name of the certifciate (see kubectl get certificate -A)

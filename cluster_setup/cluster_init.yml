@@ -15,6 +15,11 @@
     # - name: fetch token contents
     #   register: contents
     #   shell: "sudo cat /var/lib/rancher/k3s/server/node-token"
+    - name: Grab kubeconfig
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~/.kube/config
+        flat: yes
 
 - hosts: k3s_servers
   tasks:
@@ -25,10 +30,6 @@
         --no-deploy servicelb \
         --no-deploy traefik
         --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
-    - name: Grab kubeconfig
-      fetch:
-        src: /etc/rancher/k3s/k3s.yaml
-        dest: ~/.kube/config
 
 - hosts: k3s_agents
 
@@ -45,13 +46,6 @@
   vars:
     ansible_python_interpreter: "/usr/local/bin/python3"
   tasks:
-    - name: Clear postgres database
-      shell:
-        login_host: 192.168.1.250
-        db: kube
-        login_user: kube
-        login_password: kube
-        query: DROP TABLE kine
     - name: Replace kubeconfig with correct address
       replace:
         path: ~/.kube/config

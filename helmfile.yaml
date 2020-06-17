@@ -24,10 +24,11 @@ releases:
     chart: stable/nginx-ingress
     namespace: kube-system
     values:
-      - controller.image.repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm
-      - controller.image.tag: 0.25.1
-      - controller.image.runAsUser: 33
-      - defaultBackend.enabled: false
+      - values/nginx-ingress.values.yml
+      # - controller.image.repository: quay.io/kubernetes-ingress-controller/nginx-ingress-controller-arm
+      # - controller.image.tag: 0.25.1
+      # - controller.image.falserunAsUser: 33
+      # - defaultBackend.enabled:
 
   - name: oauth2-proxy
     chart: stable/oauth2-proxy
@@ -120,3 +121,8 @@ releases:
     namespace: monitoring
     values:
       - values/prometheus.values.yml
+
+  - name: unifi
+    chart: stable/unifi
+    values:
+      - values/unifi.values.yml
