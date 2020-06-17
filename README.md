@@ -38,6 +38,12 @@ ansible-playbook cluster_setup/cluster_teardown.yml
 
 ## Useful Commands
 
+Transferring secrets to the correct directory:
+
+```Shell
+rsync -aP secrets/ nas:/volume1/kube-secrets/secrets/
+```
+
 Getting all completed job pods
 
 ```Shell
