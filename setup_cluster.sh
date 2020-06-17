@@ -12,5 +12,5 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.1/a
 kubectl apply -f dashboard/
 kubectl apply -f cronjobs/
 kubectl apply -f unifi/
-sleep 5m
+kubectl wait pods -l app.kubernetes.io/instance=cert-manager -n kube-system --for=condition=Ready
 kubectl apply -f cert-manager/
