@@ -8,6 +8,15 @@ repositories:
   - name: kubernetes-dashboard
     url: https://kubernetes.github.io/dashboard/
 
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com/
+  
+  - name: jetstack
+    url: https://charts.jetstack.io
+
+  - name: drone
+    url: https://charts.drone.io
+
 releases:
   - name: metallb
     chart: stable/metallb
@@ -40,15 +49,15 @@ releases:
     chart: jetstack/cert-manager
     namespace: kube-system
 
-  - name: ha
-    chart: stable/home-assistant
-    values:
-      - values/homeassistant.values.yml
+  # - name: ha
+  #   chart: stable/home-assistant
+  #   values:
+  #     - values/homeassistant.values.yml
 
-  - name: nodered
-    chart: stable/node-red
-    values:
-      - values/nodered.values.yml
+  # - name: nodered
+  #   chart: stable/node-red
+  #   values:
+  #     - values/nodered.values.yml
 
   - name: nextcloud
     chart: stable/nextcloud
