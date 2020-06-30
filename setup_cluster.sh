@@ -1,5 +1,5 @@
 #!/bin/bash
-# scp -r patrickjmcd@192.168.1.252:/volume1/kube-secrets/secrets .
+# rsync -aP secrets/ nas:/volume1/kube-secrets/secrets/
 kubectl create ns drone
 # kubectl create ns openfaas-fn
 kubectl create ns monitoring
@@ -11,6 +11,8 @@ helmfile apply
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.1/aio/deploy/alternative.yaml  
 kubectl apply -f dashboard/
 kubectl apply -f cronjobs/
-kubectl apply -f unifi/
-kubectl wait pods -l app.kubernetes.io/instance=cert-manager -n kube-system --for=condition=Ready
+
+kubectl wait pods -l app.kubernetes.io/instance=cert-manager -n kube-system --for=condition=Ready --timeout=-1s
 kubectl apply -f cert-manager/
+kubectl wait pods -l app=nginx-ingress -n kube-system --for=condition=Ready --timeout=-1s
+kubectl apply -f unifi/

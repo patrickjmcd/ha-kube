@@ -1,27 +1,28 @@
 [dockerservers]
-192.168.1.253
+192.168.8.100
 
 [dockerservers:vars]
 ansible_python_interpreter=/usr/bin/python3
 
 [k3s_firstnode]
-192.168.1.253
+192.168.8.100
 
 [k3s_firstnode:vars]
 ansible_ssh_user=patrickjmcd
 
 [k3s_servers]
-192.168.1.100
-192.168.1.104
+192.168.8.101
+192.168.8.102
 
 [k3s_servers:vars]
 ansible_ssh_user=pi
 
 [k3s_agents]
-192.168.1.101
-192.168.1.102
-192.168.1.103
-192.168.1.105
+192.168.8.103
+192.168.8.104
+192.168.8.105
+192.168.8.106
+192.168.8.107
 
 [k3s_agents:vars]
 ansible_ssh_user=pi
