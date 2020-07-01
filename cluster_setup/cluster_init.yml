@@ -12,9 +12,6 @@
         --no-deploy traefik
         --cluster-init
         --token "{{ tkn.stdout }}"
-    # - name: fetch token contents
-    #   register: contents
-    #   shell: "sudo cat /var/lib/rancher/k3s/server/node-token"
     - name: Grab kubeconfig
       fetch:
         src: /etc/rancher/k3s/k3s.yaml

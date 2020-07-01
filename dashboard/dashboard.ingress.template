@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "kubernetes-dashboard-ingress" # Name of the ingress (see kubectl get ingress -A)
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    # kubectl -n kubernetes-dashboard get secret -o jsonpath="{.data.token}" $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | base64 --decode
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $token $upstream_http_authorization;
+      proxy_set_header Authorization "Bearer <token>";
+      proxy_pass_header Authorization;
+spec:
+  tls:
+    - hosts:
+        - "k8s.pmcd.io" # Host to access nextcloud
+      secretName: "dashboard-prod-tls" # Name of the certifciate (see kubectl get certificate -A)
+  rules:
+    - host: "k8s.pmcd.io" # Host to access nextcloud
+      http:
+        paths:
+          - path: / # We will access NextCloud via the URL https://nextcloud.<domain.com>/
+            backend:
+              serviceName: "kubernetes-dashboard" # Mapping to the service (see kubectl get services -n nextcloud)
+              servicePort: 80 # Mapping to the port (see kubectl get services -n nextcloud)

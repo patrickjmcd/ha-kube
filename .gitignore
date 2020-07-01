@@ -2,3 +2,4 @@ secrets/*
 drone_secrets.sh
 cluster_setup/test.yml
 .vscode
+dashboard/dashboard.ingress.yml

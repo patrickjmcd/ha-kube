@@ -1086,23 +1086,6 @@ pushgateway:
 ## alertmanager ConfigMap entries
 ##
 alertmanagerFiles:
-  alertmanager.yml:
-    global:
-      slack_api_url: "https://hooks.slack.com/services/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"
-
-    receivers:
-      - name: default-receiver
-        slack_configs:
-          - send_resolved: true
-            username: "alertbot"
-            channel: "#server-alerts"
-            text: "{{ range .Alerts }}*Summary:* {{ .Annotations.summary }}\n*Description:* {{ .Annotations.description }}\n----\n{{ end }}"
-
-    route:
-      group_wait: 10s
-      group_interval: 5m
-      receiver: default-receiver
-      repeat_interval: 3h
 
 ## Prometheus server ConfigMap entries
 ##

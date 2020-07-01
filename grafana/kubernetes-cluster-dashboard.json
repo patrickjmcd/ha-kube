@@ -112,7 +112,7 @@
         },
         {
             "cacheTimeout": null,
-            "colorBackground": true,
+            "colorBackground": false,
             "colorValue": false,
             "colors": ["rgba(0, 0, 0, 0)", "rgb(210, 1, 1)", "#890f02"],
             "datasource": "Prometheus",
@@ -131,7 +131,7 @@
                 "thresholdMarkers": true
             },
             "gridPos": {
-                "h": 2,
+                "h": 3,
                 "w": 8,
                 "x": 8,
                 "y": 0
@@ -170,10 +170,10 @@
                 "lineColor": "rgb(31, 120, 193)",
                 "show": false
             },
-            "tableColumn": "",
+            "tableColumn": "{job=\"kubernetes-nodes\"}",
             "targets": [
                 {
-                    "expr": "avg(up{job=\"kubelet\"}) BY (job)",
+                    "expr": "avg(up{job=\"kubernetes-nodes\"}) BY (job)",
                     "format": "time_series",
                     "instant": true,
                     "interval": "",
@@ -288,102 +288,56 @@
             "valueName": "current"
         },
         {
-            "columns": [],
             "datasource": "Prometheus",
             "fieldConfig": {
                 "defaults": {
-                    "custom": {}
+                    "custom": {},
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "s"
                 },
                 "overrides": []
             },
-            "fontSize": "90%",
             "gridPos": {
-                "h": 5,
+                "h": 4,
                 "w": 8,
                 "x": 8,
-                "y": 2
+                "y": 3
             },
             "id": 25,
             "links": [],
-            "pageSize": null,
-            "scroll": true,
-            "showHeader": true,
-            "sort": {
-                "col": 2,
-                "desc": false
+            "options": {
+                "displayMode": "lcd",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": ["mean"],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true
             },
-            "styles": [
-                {
-                    "alias": "Time",
-                    "align": "auto",
-                    "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                    "link": false,
-                    "pattern": "Time",
-                    "type": "date"
-                },
-                {
-                    "alias": "Uptime",
-                    "align": "auto",
-                    "colorMode": null,
-                    "colors": [
-                        "rgba(50, 172, 45, 0.97)",
-                        "rgba(237, 129, 40, 0.89)",
-                        "rgba(245, 54, 54, 0.9)"
-                    ],
-                    "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                    "decimals": 2,
-                    "pattern": "Value",
-                    "thresholds": [],
-                    "type": "number",
-                    "unit": "s"
-                },
-                {
-                    "alias": "",
-                    "align": "auto",
-                    "colorMode": null,
-                    "colors": [
-                        "rgba(245, 54, 54, 0.9)",
-                        "rgba(237, 129, 40, 0.89)",
-                        "rgba(50, 172, 45, 0.97)"
-                    ],
-                    "decimals": 2,
-                    "pattern": "/endpoint|job|namespace|pod|service/",
-                    "thresholds": [],
-                    "type": "hidden",
-                    "unit": "short"
-                },
-                {
-                    "alias": "",
-                    "align": "auto",
-                    "colorMode": null,
-                    "colors": [
-                        "rgba(245, 54, 54, 0.9)",
-                        "rgba(237, 129, 40, 0.89)",
-                        "rgba(50, 172, 45, 0.97)"
-                    ],
-                    "dateFormat": "YYYY-MM-DD HH:mm:ss",
-                    "decimals": 2,
-                    "pattern": "instance",
-                    "preserveFormat": false,
-                    "sanitize": false,
-                    "thresholds": [],
-                    "type": "string",
-                    "unit": "short"
-                }
-            ],
+            "pluginVersion": "7.0.5",
             "targets": [
                 {
                     "expr": "(time() - node_boot_time_seconds)",
-                    "format": "table",
+                    "format": "time_series",
                     "instant": true,
+                    "interval": "",
                     "intervalFactor": 1,
+                    "legendFormat": "{{ kubernetes_node}}",
                     "refId": "A"
                 }
             ],
             "title": "Node Uptime",
-            "transform": "table",
-            "transparent": true,
-            "type": "table-old"
+            "type": "bargauge"
         },
         {
             "collapsed": false,
@@ -1040,7 +994,7 @@
                 "conditions": [
                     {
                         "evaluator": {
-                            "params": [85],
+                            "params": [180],
                             "type": "gt"
                         },
                         "operator": {
@@ -1111,7 +1065,7 @@
             "steppedLine": false,
             "targets": [
                 {
-                    "expr": "max(rpi_cpu_temperature_celsius) by (kubernetes_node)",
+                    "expr": "max(((rpi_cpu_temperature_celsius) * 1.8) + 32) by (kubernetes_node)",
                     "format": "time_series",
                     "hide": false,
                     "interval": "",
@@ -1120,10 +1074,16 @@
                     "refId": "A"
                 },
                 {
-                    "expr": "max(node_hwmon_temp_celsius) by (kubernetes_node)",
+                    "expr": "max(((node_hwmon_temp_celsius) * 1.8) + 32) by (kubernetes_node)",
                     "interval": "",
                     "legendFormat": "{{ kubernetes_node }}",
                     "refId": "B"
+                },
+                {
+                    "expr": "",
+                    "interval": "",
+                    "legendFormat": "",
+                    "refId": "C"
                 }
             ],
             "thresholds": [
@@ -1132,7 +1092,7 @@
                     "fill": true,
                     "line": true,
                     "op": "gt",
-                    "value": 85
+                    "value": 180
                 }
             ],
             "timeFrom": null,
@@ -1154,7 +1114,7 @@
             },
             "yaxes": [
                 {
-                    "format": "celsius",
+                    "format": "fahrenheit",
                     "label": null,
                     "logBase": 1,
                     "max": null,
@@ -1817,5 +1777,5 @@
     "timezone": "browser",
     "title": "Kubernetes cluster monitoring (via Prometheus)",
     "uid": "82pBZCmRkasd",
-    "version": 13
+    "version": 16
 }

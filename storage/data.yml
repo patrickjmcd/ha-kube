@@ -296,3 +296,35 @@ spec:
     selector:
         matchLabels:
             mediatype: data-registry
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nfs-data-transcode
+    labels:
+        mediatype: data-transcode
+spec:
+    capacity:
+        storage: 20Gi # This size is used to match a volume to a tenents claim
+    storageClassName: manual
+    accessModes:
+        - ReadWriteMany # Access modes are defined below
+    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below
+    nfs:
+        server: 192.168.1.252
+        path: /volume1/data/plex-transcode # Please change this to the relevant share
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nfs-data-transcode-claim
+spec:
+    accessModes:
+        - ReadWriteMany # Access modes for volumes is defined under Persistent Volumes
+    storageClassName: manual
+    resources:
+        requests:
+            storage: 20Gi # volume size requested
+    selector:
+        matchLabels:
+            mediatype: data-transcode

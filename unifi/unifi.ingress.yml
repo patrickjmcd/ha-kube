@@ -15,6 +15,9 @@ spec:
     - port: 10001
       targetPort: 10001
       name: discovery
+    - port: 8443
+      targetPort: 8443
+      name: gui
   selector:
     app.kubernetes.io/name: unifi
   type: LoadBalancer

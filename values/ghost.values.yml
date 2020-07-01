@@ -1,0 +1,54 @@
+replicaCount: 1
+
+image:
+  repository: ghost
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+uid: 1026
+gid: 100
+
+env:
+  - name: url
+    value: https://blog.pmcd.io
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+
+  path: /
+  hosts:
+    - blog.pmcd.io
+  tls:
+    - secretName: "ghost-prod-tls"
+      hosts:
+        - blog.pmcd.io
+
+volumes:
+  - name: content
+    persistentVolumeClaim:
+      claimName: nfs-config-ghost-claim
+
+volumeMounts:
+  - name: content
+    mountPath: /var/lib/ghost/content
+
+# resources:
+#   requests:
+#     memory: 128Mi
+#     cpu: 0.1
+#   limits:
+#     memory: 256Mi
+#     cpu: 0.5
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
