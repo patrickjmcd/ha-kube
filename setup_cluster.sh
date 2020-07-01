@@ -1,6 +1,7 @@
 #!/bin/bash
-# echo "Copying Secrets"
-# rsync -aP secrets/ nas:/volume1/kube-secrets/secrets/
+echo "!!! Copying Secrets"
+rsync -aP nas:/volume1/kube-secrets/secrets/ secrets/
+rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ secrets_postinstall/
 
 echo "!!! setting up namespaces"
 kubectl create ns drone
@@ -35,5 +36,5 @@ kubectl apply -f unifi/
 echo "!!! setting up ARM-specific temperature monitoring"
 kubectl apply -f prometheus/
 
-echo "!!! setting up post-install stuff"
-kubectl apply -f postinstall/
+echo "!!! setting up post-install secrets"
+kubectl apply -f secrets_postinstall/
