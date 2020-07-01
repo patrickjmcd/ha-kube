@@ -138,3 +138,8 @@ releases:
     chart: stable/unifi
     values:
       - values/unifi.values.yml
+
+  - name: ghost
+    chart: patrickjmcd/ghost
+    values:
+      - values/ghost.values.yml
