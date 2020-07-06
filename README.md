@@ -55,3 +55,11 @@ Deleting all completed job pods
 ```Shell
 kubectl delete pod --field-selector=status.phase==Succeeded
 ```
+
+### Fixing a namespace stuck in Terminating
+
+```Shell
+kubectl get namespace monitoring -o json > monitoring.json
+# remove "kubernetes" from the finalizers array
+kubectl replace --raw "/api/v1/namespaces/monitoring/finalize" -f ./monitoring.json
+```
