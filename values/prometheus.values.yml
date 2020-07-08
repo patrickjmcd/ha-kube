@@ -588,6 +588,7 @@ server:
     ##
     ## storage.tsdb.wal-compression flag enables compression of the write-ahead log (WAL)
     # - storage.tsdb.wal-compression
+    - web.external-url=https://prometheus.pmcd.io
 
   ## Path to a configuration file on prometheus server container FS
   configPath: /etc/config/prometheus.yml

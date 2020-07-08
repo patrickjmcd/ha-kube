@@ -6,6 +6,7 @@ rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ secrets_postinstall/
 echo "!!! setting up namespaces"
 kubectl create ns drone
 kubectl create ns monitoring
+kubectl create ns cron
 
 echo "!!! installing certmanager CRDs"
 kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.14/deploy/manifests/00-crds.yaml

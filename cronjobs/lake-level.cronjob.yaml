@@ -2,6 +2,7 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: lake-level-fetcher
+  namespace: cron
 spec:
   schedule: "0 * * * *"
   successfulJobsHistoryLimit: 3
