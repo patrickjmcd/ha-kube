@@ -3,7 +3,7 @@
 ##
 image:
   repository: nextcloud
-  tag: 17.0.0-apache
+  tag: 17-apache
   pullPolicy: IfNotPresent
   # pullSecrets:
   #   - myRegistrKeySecretName
@@ -297,14 +297,14 @@ resources:
 ##
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 30
+  initialDelaySeconds: 300
   periodSeconds: 15
   timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
 readinessProbe:
   enabled: true
-  initialDelaySeconds: 30
+  initialDelaySeconds: 300
   periodSeconds: 15
   timeoutSeconds: 5
   failureThreshold: 3
