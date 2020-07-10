@@ -1,0 +1,12 @@
+- hosts: k3s_servers,k3s_firstnode,k3s_agents
+  become: yes
+  tasks:
+    - name: Update repositories cache and install packages
+      apt:
+        update_cache: yes
+        pkg:
+          - python
+          - python-pip
+          - python3
+          - python3-pip
+          - nfs-common
