@@ -10,9 +10,11 @@ spec:
     spec:
       template:
         spec:
+          imagePullSecrets:
+            - name: registry-cred
           containers:
             - name: speedtest
-              image: patrickjmcd/speedtest
+              image: registry.pmcd.io/speedtest
               env:
                 - name: INFLUXDB_ADDRESS
                   valueFrom:
