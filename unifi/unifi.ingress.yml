@@ -21,3 +21,5 @@ spec:
   selector:
     app.kubernetes.io/name: unifi
   type: LoadBalancer
+  externalIPs:
+    - 192.168.8.201
