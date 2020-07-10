@@ -10,7 +10,7 @@ spec:
     storageClassName: manual
     accessModes:
         - ReadWriteMany # Access modes are defined below
-    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below 
+    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below
     nfs:
         server: 192.168.1.252
         path: /volume1/movies # Please change this to the relevant share
@@ -19,7 +19,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
     name: nfs-movies-claim
-    namespace: default
+    namespace: media
 spec:
     accessModes:
         - ReadWriteMany # Access modes for volumes is defined under Persistent Volumes

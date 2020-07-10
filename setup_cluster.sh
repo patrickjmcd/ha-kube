@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "!!! Copying Secrets"
 rsync -aP nas:/volume1/kube-secrets/secrets/ secrets/
 rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ secrets_postinstall/
@@ -7,6 +8,7 @@ echo "!!! setting up namespaces"
 kubectl create ns drone
 kubectl create ns monitoring
 kubectl create ns cron
+kubectl create ns media
 
 echo "!!! installing certmanager CRDs"
 kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.14/deploy/manifests/00-crds.yaml
@@ -34,8 +36,8 @@ echo "!!! waiting for nginx-ingress to grab the first IP from metallb before set
 kubectl wait pods -l app=nginx-ingress -n kube-system --for=condition=Ready --timeout=-1s
 kubectl apply -f unifi/
 
-echo "!!! setting up ARM-specific temperature monitoring"
-kubectl apply -f prometheus/
+# echo "!!! setting up ARM-specific temperature monitoring"
+# kubectl apply -f prometheus/
 
-echo "!!! setting up post-install secrets"
+# echo "!!! setting up post-install secrets"
 kubectl apply -f secrets_postinstall/

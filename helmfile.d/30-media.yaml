@@ -1,0 +1,40 @@
+repositories:
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com/
+
+releases:
+  - name: sonarr
+    namespace: media
+    chart: patrickjmcd/sonarr
+    values:
+      - ../values/sonarr.values.yml
+
+  - name: radarr
+    namespace: media
+    chart: patrickjmcd/radarr
+    values:
+      - ../values/radarr.values.yml
+
+  - name: lidarr
+    namespace: media
+    chart: patrickjmcd/lidarr
+    values:
+      - ../values/lidarr.values.yml
+
+  - name: nzbget
+    namespace: media
+    chart: patrickjmcd/nzbget
+    values:
+      - ../values/nzbget.values.yml
+
+  - name: nzbhydra
+    namespace: media
+    chart: patrickjmcd/nzbhydra
+    values:
+      - ../values/nzbhydra.values.yml
+
+  - name: ombi
+    namespace: media
+    chart: patrickjmcd/ombi
+    values:
+      - ../values/ombi.values.yml

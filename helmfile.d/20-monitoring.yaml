@@ -1,0 +1,28 @@
+repositories:
+  - name: stable
+    url: https://kubernetes-charts.storage.googleapis.com/
+
+releases:
+  - name: prometheus
+    chart: stable/prometheus
+    namespace: monitoring
+    values:
+      - ../values/prometheus.values.yml
+    hooks:
+      - events: ["cleanup"]
+        showlogs: true
+        command: "kubectl"
+        args:
+          [
+            "apply",
+            "-f",
+            "../secrets_postinstall/prometheus-alertmanager.configmap.yml",
+            "-f",
+            "../prometheus",
+          ]
+
+  - name: grafana
+    namespace: monitoring
+    chart: stable/grafana
+    values:
+      - ../values/grafana.values.yml
