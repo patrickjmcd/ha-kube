@@ -2,6 +2,9 @@ repositories:
   - name: stable
     url: https://kubernetes-charts.storage.googleapis.com/
 
+  - name: loki
+    url: https://grafana.github.io/loki/charts
+
 releases:
   - name: prometheus
     chart: stable/prometheus
