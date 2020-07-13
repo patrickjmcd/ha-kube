@@ -35,9 +35,10 @@ kubectl apply -f cert-manager/
 echo "!!! waiting for nginx-ingress to grab the first IP from metallb before setting up Unifi ingest"
 kubectl wait pods -l app=nginx-ingress -n kube-system --for=condition=Ready --timeout=-1s
 kubectl apply -f unifi/
+kubectl apply -f homebridge/
 
 # echo "!!! setting up ARM-specific temperature monitoring"
 # kubectl apply -f prometheus/
 
 # echo "!!! setting up post-install secrets"
-kubectl apply -f secrets_postinstall/
+# kubectl apply -f secrets_postinstall/
