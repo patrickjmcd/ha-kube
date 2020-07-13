@@ -15,3 +15,8 @@ releases:
     chart: patrickjmcd/ghost
     values:
       - ../values/ghost.values.yml
+  
+  - name: homebridge
+    chart: patrickjmcd/homebridge
+    values:
+      - ../values/homebridge.values.yml
