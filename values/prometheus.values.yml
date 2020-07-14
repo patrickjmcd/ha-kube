@@ -842,7 +842,7 @@ server:
       memory: 128Mi
       cpu: 0.1
     limits:
-      memory: 512Mi
+      memory: 1Gi
       cpu: 1.0
 
   ## Vertical Pod Autoscaler config
