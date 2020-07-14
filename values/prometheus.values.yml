@@ -496,13 +496,12 @@ nodeExporter:
   ## Ref: https://kubernetes.io/docs/user-guide/compute-resources/
   ##
   resources:
-    {}
-    # limits:
-    #   cpu: 200m
-    #   memory: 50Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 30Mi
+    limits:
+      cpu: 200m
+      memory: 50Mi
+    requests:
+      cpu: 100m
+      memory: 30Mi
 
   ## Security context to be added to node-exporter pods
   ##
@@ -839,13 +838,12 @@ server:
   ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
   resources:
-    {}
-    # limits:
-    #   cpu: 500m
-    #   memory: 512Mi
-    # requests:
-    #   cpu: 500m
-    #   memory: 512Mi
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 512Mi
+      cpu: 1.0
 
   ## Vertical Pod Autoscaler config
   ## Ref: https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
@@ -999,13 +997,12 @@ pushgateway:
   ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ##
   resources:
-    {}
-    # limits:
-    #   cpu: 10m
-    #   memory: 32Mi
-    # requests:
-    #   cpu: 10m
-    #   memory: 32Mi
+    limits:
+      cpu: 10m
+      memory: 32Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
 
   ## Security context to be added to push-gateway pods
   ##

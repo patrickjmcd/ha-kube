@@ -29,3 +29,9 @@ releases:
     chart: stable/grafana
     values:
       - ../values/grafana.values.yml
+
+  - name: loki
+    namespace: monitoring
+    chart: loki/loki-stack
+    values:
+      - ../values/loki.values.yml

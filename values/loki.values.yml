@@ -1,27 +1,28 @@
 loki:
   enabled: true
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 512Mi
+      cpu: 1.0
 
 promtail:
   enabled: true
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 512Mi
+      cpu: 1.0
 
 fluent-bit:
   enabled: false
 
 grafana:
   enabled: false
-  sidecar:
-    datasources:
-      enabled: true
-  image:
-    tag: 6.7.0
 
 prometheus:
   enabled: false
-
-resources:
-  requests:
-    memory: 128Mi
-    cpu: 0.1
-  limits:
-    memory: 512Mi
-    cpu: 1.0
