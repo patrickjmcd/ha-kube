@@ -18,3 +18,10 @@ grafana:
 prometheus:
   enabled: false
 
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 0.1
+  limits:
+    memory: 512Mi
+    cpu: 1.0
