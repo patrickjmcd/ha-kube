@@ -63,3 +63,24 @@ kubectl get namespace monitoring -o json > monitoring.json
 # remove "kubernetes" from the finalizers array
 kubectl replace --raw "/api/v1/namespaces/monitoring/finalize" -f ./monitoring.json
 ```
+
+### Creating the database
+
+#### when logged in to postgres server
+
+```Shell
+sudo su postgres
+psql -c "CREATE DATABASE nextcloud;"
+psql -c "GRANT ALL PRIVILEGES ON DATABASE nextcloud TO kube;"
+exit
+```
+
+#### Deleting the Database
+
+#### When logged into the Postgres Server
+
+```Shell
+sudo su postgres
+psql -c "DROP DATABASE nextcloud;"
+exit
+```
