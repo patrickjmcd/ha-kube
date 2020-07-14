@@ -60,13 +60,12 @@ ingress:
   #      - chart-example.local
 
 resources:
-  {}
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    memory: 128Mi
+    cpu: 0.1
+  limits:
+    memory: 512Mi
+    cpu: 1.0
 
 ## If you'd like to force the Drone runner to run on a specific node or set of nodes,
 ## set a selector here.
