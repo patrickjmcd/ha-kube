@@ -38,3 +38,9 @@ releases:
     chart: patrickjmcd/ombi
     values:
       - ../values/ombi.values.yml
+
+  - name: beets
+    namespace: media
+    chart: patrickjmcd/beets
+    values:
+      - ../values/beets.values.yml
