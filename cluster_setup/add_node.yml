@@ -19,3 +19,18 @@
         K3S_KUBECONFIG_MODE: "644"
         K3S_URL: "https://{{ groups['k3s_firstnode'][0] }}:6443"
 
+- hosts: k3s_servers
+  tasks:
+    - name: Check for uninstaller on server nodes
+      stat:
+        path: /usr/local/bin/k3s-uninstall.sh
+      register: st
+
+    - name: Install k3s on server nodes
+      when: not st.stat.exists
+      shell: curl -sfL https://get.k3s.io | sh -s - server \
+        --datastore-endpoint="postgres://kube:kube@192.168.1.250:5432/kube" \
+        --write-kubeconfig-mode 644 \
+        --no-deploy servicelb \
+        --no-deploy traefik
+        --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"

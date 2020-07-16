@@ -11,6 +11,9 @@ env:
   - name: PGID
     value: "100"
 
+uid: 1026
+gid: 100
+
 ingress:
   enabled: true
   annotations:
