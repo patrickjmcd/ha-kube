@@ -41,7 +41,7 @@ volumeMounts:
     mountPath: "/config"
   - name: downloads
     mountPath: "/downloads"
-    subPath: "complete/music"
+    subPath: "complete/Music"
   - name: music
     mountPath: "/music"
 
