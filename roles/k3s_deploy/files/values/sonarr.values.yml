@@ -1,0 +1,56 @@
+replicaCount: 1
+
+image:
+  repository: linuxserver/sonarr
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  - name: PUID
+    value: "1026"
+  - name: PGID
+    value: "100"
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+
+  path: /
+  hosts:
+    - sonarr.pmcd.io
+  tls:
+    - secretName: "sonarr-prod-tls"
+      hosts:
+        - sonarr.pmcd.io
+
+volumes:
+  - name: config
+    persistentVolumeClaim:
+      claimName: nfs-config-sonarr-claim
+  - name: tv
+    persistentVolumeClaim:
+      claimName: nfs-tv-claim
+  - name: downloads
+    persistentVolumeClaim:
+      claimName: nfs-downloads-claim
+
+volumeMounts:
+  - name: config
+    mountPath: "/config"
+  - name: downloads
+    mountPath: "/downloads"
+  - name: tv
+    mountPath: "/tv"
+
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 0.1
+  limits:
+    memory: 512Mi
+    cpu: 1.0

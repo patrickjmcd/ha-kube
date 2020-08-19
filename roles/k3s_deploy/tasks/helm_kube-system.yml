@@ -1,0 +1,98 @@
+---
+- name: Add stable repository
+  community.kubernetes.helm_repository:
+    name: stable
+    state: present
+    repo_url: https://kubernetes-charts.storage.googleapis.com/
+
+- name: Add jetstack repository
+  community.kubernetes.helm_repository:
+    name: jetstack
+    state: present
+    repo_url: https://charts.jetstack.io
+
+- name: Add ingress-nginx repository
+  community.kubernetes.helm_repository:
+    name: ingress-nginx
+    state: present
+    repo_url: https://kubernetes.github.io/ingress-nginx/
+
+- name: Add nginx-stable repository
+  community.kubernetes.helm_repository:
+    name: nginx-stable
+    state: present
+    repo_url: https://helm.nginx.com/stable
+
+- name: Install metallb helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: stable/metallb
+    name: metallb
+    release_namespace: kube-system
+    values:
+      configInline:
+        address-pools:
+          - name: default
+            protocol: layer2
+            addresses:
+              - 192.168.8.200-192.168.8.210
+
+# - name: Install ingress-nginx helm chart
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: ingress-nginx/ingress-nginx
+#     name: ingress-nginx
+#     release_namespace: kube-system
+
+# - name: clean up nginx
+#   shell: "kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission"
+#   ignore_errors: yes # needed to keep going
+
+- name: Install nginx-ingress helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: stable/nginx-ingress
+    name: nginx-ingress
+    release_namespace: kube-system
+    values:
+      defaultBackend:
+        enabled: false
+      # nodeSelector:
+      #   beta.kubernetes.io/arch: amd64
+
+- name: Install oauth2-proxy helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: stable/oauth2-proxy
+    name: oauth2-proxy-nginx
+    release_namespace: kube-system
+    values: "{{ lookup('file', 'files/values/oauth2-proxy.values.yml') | from_yaml }}"
+
+- name: Install cert-manager helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: jetstack/cert-manager
+    name: cert-manager
+    release_namespace: cert-manager
+    # chart_version: "{{ cert_manager_version }}"
+    values:
+      installCRDs: true
+
+- name: Wait for cert-manager pods become ready
+  shell: "kubectl wait pods -l app.kubernetes.io/instance=cert-manager -n cert-manager --for=condition=Ready --timeout=1000s"
+  register: cert_manager_pods_ready
+
+- name: create cert-manager ClusterIssuer resources
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/cert-manager/*.yml"
+
+- name: Install docker registry helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: stable/docker-registry
+    name: registry
+    release_namespace: kube-system
+    values: "{{ lookup('file', 'files/values/registry.values.yml') | from_yaml }}"

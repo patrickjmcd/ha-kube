@@ -1,0 +1,34 @@
+---
+- name: Check for uninstaller on server nodes
+  stat:
+    path: /usr/local/bin/k3s-uninstall.sh
+  register: server
+  tags:
+    - teardown
+
+- name: Uninstall k3s on server nodes
+  shell: /usr/local/bin/k3s-uninstall.sh
+  when: server.stat.exists
+  tags:
+    - teardown
+
+- name: Check for uninstaller on worker nodes
+  stat:
+    path: /usr/local/bin/k3s-agent-uninstall.sh
+  register: agent
+  tags:
+    - teardown
+
+- name: Uninstall k3s on worker nodes
+  shell: /usr/local/bin/k3s-agent-uninstall.sh
+  when: agent.stat.exists
+  tags:
+    - teardown
+
+- name: Reboot the machine
+  become: yes
+  when: agent.stat.exists or server.stat.exists
+  reboot:
+    msg: "Rebooting to clear k3s"
+  tags:
+    - teardown

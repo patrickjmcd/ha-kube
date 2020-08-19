@@ -1,0 +1,2 @@
+---
+server_ip_address: "{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}"

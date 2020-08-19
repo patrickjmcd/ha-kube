@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "kubernetes-dashboard-ingress"
+  namespace: kubernetes-dashboard
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+    nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $token $upstream_http_authorization;
+      proxy_set_header Authorization "Bearer {{ tkn.stdout }}";
+      proxy_pass_header Authorization;
+spec:
+  tls:
+    - hosts:
+        - "k8s.pmcd.io" # Host to access nextcloud
+      secretName: "dashboard-prod-tls"
+  rules:
+    - host: "k8s.pmcd.io"
+      http:
+        paths:
+          - path: / 
+            backend:
+              serviceName: "kubernetes-dashboard"
+              servicePort: 80 

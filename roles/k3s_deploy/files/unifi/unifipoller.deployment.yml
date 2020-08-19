@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi-poller
+  namespace: monitoring
+  labels:
+    k8s-app: unifi-poller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: unifi-poller
+  template:
+    metadata:
+      labels:
+        k8s-app: unifi-poller
+    spec:
+      containers:
+        - name: unifi-poller
+          image: golift/unifi-poller:latest
+          ports:
+            - containerPort: 9130
+              hostPort: 9130
+              name: prometheus
+          env:
+            - name: UP_UNIFI_DEFAULT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secret
+                  key: unifi-default-url
+            - name: UP_UNIFI_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secret
+                  key: unifi-default-user
+            - name: UP_UNIFI_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: unifi-secret
+                  key: unifi-default-pass
+            - name: UP_INFLUXDB_DISABLE
+              value: "true"
+            - name: UP_UNIFI_DEFAULT_SAVE_DPI
+              value: "true"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: unifi-poller
+  name: unifi-poller
+  namespace: monitoring
+  annotations:
+    prometheus.io/scrape: "true"
+spec:
+  clusterIP: None
+  ports:
+    - name: prometheus
+      port: 9130
+      targetPort: prometheus
+  selector:
+    k8s-app: unifi-poller

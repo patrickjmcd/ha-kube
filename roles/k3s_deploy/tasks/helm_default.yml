@@ -1,0 +1,37 @@
+---
+- name: Add stable repository
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm_repository:
+    name: stable
+    state: present
+    repo_url: https://kubernetes-charts.storage.googleapis.com/
+
+- name: Add patrickjmcd repository
+  community.kubernetes.helm_repository:
+    name: patrickjmcd
+    state: present
+    repo_url: https://patrickjmcd.github.io/helm-charts
+
+- name: Install ghost helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: patrickjmcd/ghost
+    name: ghost
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/ghost.values.yml') | from_yaml }}"
+
+- name: Install homebridge helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: patrickjmcd/homebridge
+    name: homebridge
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/homebridge.values.yml') | from_yaml }}"
+
+- name: Install metabase helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: stable/metabase
+    name: metabase
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/metabase.values.yml') | from_yaml }}"

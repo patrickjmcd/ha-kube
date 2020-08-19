@@ -1,0 +1,170 @@
+---
+- name: install pip modules
+  pip:
+    name:
+      - openshift
+      - pyhelm
+
+- name: pull secrets
+  shell: "rsync -aP nas:/volume1/kube-secrets/secrets/ /tmp/secrets/"
+  tags:
+    - secrets
+
+- name: pull postinstall_secrets
+  shell: "rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ /tmp/secrets_postinstall/"
+  tags:
+    - secrets
+
+- name: create drone namespace
+  k8s:
+    name: drone
+    kind: Namespace
+    state: present
+  tags:
+    - namespaces
+
+- name: create monitoring namespace
+  k8s:
+    name: monitoring
+    kind: Namespace
+    state: present
+  tags:
+    - namespaces
+
+- name: create cron namespace
+  k8s:
+    name: cron
+    kind: Namespace
+    state: present
+  tags:
+    - namespaces
+
+- name: create media namespace
+  k8s:
+    name: media
+    kind: Namespace
+    state: present
+  tags:
+    - namespaces
+
+- name: create cert-manager namespace
+  k8s:
+    name: cert-manager
+    kind: Namespace
+    state: present
+  tags:
+    - namespaces
+
+# - name: grab cert-manager CRDs
+#   get_url:
+#     url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.crds.yaml"
+#     dest: /tmp/cert-manager.crds.yaml
+#     mode: 0777
+
+# - name: install cert-manager crds
+#   k8s:
+#     state: present
+#     src: /tmp/cert-manager.crds.yaml
+
+- name: apply secrets
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "/tmp/secrets/*.yml"
+  tags:
+    - secrets
+
+- name: apply storage
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/storage/*.yml"
+  tags:
+    - storage
+
+- include: helm_kube-system.yml
+  tags:
+    - helm
+    - helm-kube-system
+
+- include: helm_drone.yml
+  tags:
+    - helm
+    - helm-drone
+
+- include: helm_monitoring.yml
+  tags:
+    - helm
+    - helm-monitoring
+
+- include: helm_media.yml
+  tags:
+    - helm
+    - helm-media
+
+- include: helm_default.yml
+  tags:
+    - helm
+    - helm-default
+
+- name: apply cronjobs
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/cronjobs/*.yml"
+
+- name: apply unifi
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/unifi/*.yml"
+
+- name: grab kube-dashboard
+  get_url:
+    url: "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.1/aio/deploy/alternative.yaml"
+    dest: /tmp/dashboard.yml
+    mode: 0777
+  tags:
+    - dashboard
+
+- name: apply kube-dashboard
+  k8s:
+    state: present
+    src: /tmp/dashboard.yml
+  tags:
+    - dashboard
+
+- name: apply kube-dashboard admin-user
+  k8s:
+    state: present
+    src: "{{ role_path }}/files/dashboard/dashboard.admin-user.yml"
+  tags:
+    - dashboard
+
+- name: get dashboard bearer token
+  shell: echo $(kubectl -n kubernetes-dashboard get secret -o jsonpath="{.data.token}" $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | base64 --decode)
+  register: tkn
+  tags:
+    - dashboard
+
+- name: make dashboard ingress file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: u=rw,g=r,o=r
+  with_items:
+    - src: dashboard.ingress.j2
+      dest: /tmp/dashboard.ingress.yml
+  tags:
+    - dashboard
+
+- name: apply kube-dashboard ingress
+  k8s:
+    state: present
+    src: /tmp/dashboard.ingress.yml
+  tags:
+    - dashboard

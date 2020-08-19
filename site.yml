@@ -1,0 +1,62 @@
+#!/usr/bin/env ansible-playbook -i inventory --tags dashboard
+---
+- name: initialize cluster
+  hosts: k3s_servers:k3s_firstnode:k3s_agents
+  gather_facts: true
+  roles:
+    - { role: cluster }
+  tags:
+    - cluster
+
+- name: setup first node
+  hosts: k3s_firstnode
+  gather_facts: true
+  roles:
+    - { role: k3s, server_role: "first" }
+  tags:
+    - bootstrap
+
+- name: setup servers
+  hosts: k3s_servers
+  gather_facts: true
+  roles:
+    - { role: k3s, server_role: "server" }
+  tags:
+    - bootstrap
+
+- name: setup servers
+  hosts: k3s_agents
+  gather_facts: true
+  roles:
+    - { role: k3s, server_role: "agent" }
+  tags:
+    - bootstrap
+
+- name: deploy cluster
+  hosts: k3s_firstnode
+  gather_facts: true
+  roles:
+    - { role: k3s_deploy }
+  tags:
+    - deploy
+
+# TEARDOWN SCRIPT
+- hosts: k3s_servers:k3s_firstnode:k3s_agents
+  become: yes
+  tags:
+    - teardown
+  roles:
+    - { role: k3s_teardown }
+
+- hosts: localhost
+  connection: local
+  tags:
+    - teardown
+  tasks:
+    - name: Clear postgres database
+      postgresql_query:
+        login_host: 192.168.1.250
+        db: kube
+        login_user: kube
+        login_password: kube
+        query: DROP TABLE kine

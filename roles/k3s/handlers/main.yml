@@ -1,0 +1,7 @@
+---
+- name: fix kubeconfig
+  replace:
+    path: ~/.kube/config
+    regexp: "127.0.0.1"
+    replace: "{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}"
+  delegate_to: localhost
