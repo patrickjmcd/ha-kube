@@ -60,3 +60,11 @@
     name: beets
     release_namespace: media
     values: "{{ lookup('file', 'files/values/beets.values.yml') | from_yaml }}"
+
+- name: Install jellyfin helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: patrickjmcd/jellyfin
+    name: jellyfin
+    release_namespace: media
+    values: "{{ lookup('file', 'files/values/jellyfin.values.yml') | from_yaml }}"
