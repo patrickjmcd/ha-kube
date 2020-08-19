@@ -12,6 +12,12 @@
     state: present
     repo_url: https://patrickjmcd.github.io/helm-charts
 
+- name: Add influxdata repository
+  community.kubernetes.helm_repository:
+    name: influxdata
+    state: present
+    repo_url: https://helm.influxdata.com/
+
 - name: Install ghost helm chart
   ignore_errors: yes # needed to keep going
   community.kubernetes.helm:
@@ -35,3 +41,11 @@
     name: metabase
     release_namespace: default
     values: "{{ lookup('file', 'files/values/metabase.values.yml') | from_yaml }}"
+
+- name: Install influxdb helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: influxdata/influxdb
+    name: influxdb
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/influxdb.values.yml') | from_yaml }}"

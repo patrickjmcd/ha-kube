@@ -34,5 +34,9 @@ spec:
                     secretKeyRef:
                       name: influxdb-secret
                       key: influxdb-password
+                - name: INFLUXDB_USE_SSL
+                  value: "yes"
+                - name: INFLUXDB_PORT
+                  value: "443"
 
           restartPolicy: OnFailure
