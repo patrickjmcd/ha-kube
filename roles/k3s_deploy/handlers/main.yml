@@ -1,1 +1,18 @@
 ---
+- name: Remove secret mounts
+  mount:
+    name: "{{ item.name }}"
+    state: unmounted
+  loop:
+    - { name: "/tmp/secrets", source: "192.168.1.252:/volume1/kube-secrets" }
+  tags:
+    - cleanup
+
+- name: delete secret folders
+  file:
+    path: "{{ item.name }}"
+    state: absent
+  loop:
+    - { name: "/tmp/secrets", source: "192.168.1.252:/volume1/kube-secrets" }
+  tags:
+    - cleanup

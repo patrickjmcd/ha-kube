@@ -19,10 +19,10 @@
     release_namespace: monitoring
     values: "{{ lookup('file', 'files/values/prometheus.values.yml') | from_yaml }}"
 
-- name: apply prometheus postinstall secrets
-  k8s:
-    state: present
-    src: "/tmp/secrets_postinstall/prometheus-alertmanager.configmap.yml"
+# - name: apply prometheus postinstall secrets
+#   k8s:
+#     state: present
+#     src: "/tmp/secrets_postinstall/prometheus-alertmanager.configmap.yml"
 
 - name: Install grafana helm chart
   ignore_errors: yes # needed to keep going

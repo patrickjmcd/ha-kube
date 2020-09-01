@@ -41,6 +41,10 @@
       defaultBackend:
         enabled: false
 
+- name: Wait for nginx pods become ready
+  shell: "kubectl wait pods -l app.kubernetes.io/instance=ingress-nginx -n kube-system --for=condition=Ready --timeout=1000s"
+  register: nginx_pods_ready
+
 - name: Install oauth2-proxy helm chart
   ignore_errors: yes # needed to keep going
   community.kubernetes.helm:

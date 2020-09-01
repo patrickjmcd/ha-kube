@@ -41,6 +41,8 @@ spec:
                       key: influxdb-password
                 - name: INFLUXDB_USE_SSL
                   value: "yes"
+                - name: INFLUXDB_PORT
+                  value: "443"
 
             - name: beaver-lake-level
               image: patrickjmcd/lake-info

@@ -1,5 +1,5 @@
 config:
-  existingSecret: oauth2-proxy-creds
+  existingSecret: github-oauth2-proxy-creds
   configFile: |-
     email_domains = []
     upstreams = [ "file:///dev/null" ]
@@ -7,24 +7,23 @@ config:
 extraArgs:
   whitelist-domain: .pmcd.io,.patrick.tools
   cookie-domain: .pmcd.io
-  provider: google
-  # provider: github
-  # github-user: patrickjmcd
-  # cookie-httponly: "false"
-  # email-domain:
+  # provider: google
+  provider: github
+  github-user: patrickjmcd
+  email-domain: "*"
 
 image:
   repository: "quay.io/oauth2-proxy/oauth2-proxy"
   tag: "latest"
   pullPolicy: "Always"
 
-authenticatedEmailsFile:
-  enabled: true
-  restricted_access: |-
-    patrickjmcd@gmail.com
-    mcdonagh.cari@gmail.com
 # authenticatedEmailsFile:
-#   enabled: false
+#   enabled: true
+#   restricted_access: |-
+#     patrickjmcd@gmail.com
+#     mcdonagh.cari@gmail.com
+authenticatedEmailsFile:
+  enabled: false
 
 ingress:
   enabled: true

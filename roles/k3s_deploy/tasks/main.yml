@@ -5,15 +5,15 @@
       - openshift
       - pyhelm
 
-- name: pull secrets
-  shell: "rsync -aP nas:/volume1/kube-secrets/secrets/ /tmp/secrets/"
-  tags:
-    - secrets
+# - name: pull secrets
+#   shell: "rsync -aP nas:/volume1/kube-secrets/secrets/ /tmp/secrets/"
+#   tags:
+#     - secrets
 
-- name: pull postinstall_secrets
-  shell: "rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ /tmp/secrets_postinstall/"
-  tags:
-    - secrets
+# - name: pull postinstall_secrets
+#   shell: "rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ /tmp/secrets_postinstall/"
+#   tags:
+#     - secrets
 
 - name: create drone namespace
   k8s:
@@ -71,7 +71,8 @@
     state: present
     src: "{{ item }}"
   with_fileglob:
-    - "/tmp/secrets/*.yml"
+    # - "/tmp/secrets/*.yml"
+    - "{{ role_path }}/files/secrets/*.yml"
   tags:
     - secrets
 
@@ -99,15 +100,43 @@
     - helm
     - helm-monitoring
 
-- include: helm_media.yml
-  tags:
-    - helm
-    - helm-media
+- name: Add hashicorp repository
+  community.kubernetes.helm_repository:
+    name: hashicorp
+    state: present
+    repo_url: https://helm.releases.hashicorp.com
 
-- include: helm_default.yml
+- name: Install consul helm chart
+  community.kubernetes.helm:
+    chart_ref: hashicorp/consul
+    name: consul
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/consul.values.yml') | from_yaml }}"
   tags:
-    - helm
-    - helm-default
+    - consul
+
+- name: apply consul ingress
+  k8s:
+    state: present
+    src: "{{ role_path }}/files/consul/consul.ingress.yml"
+  tags:
+    - consul
+
+- name: Install media helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: "{{ role_path }}/files/charts/media"
+    name: media
+    release_namespace: media
+    values: "{{ lookup('file', 'files/values/media.values.yml') | from_yaml }}"
+
+- name: Install default helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: "{{ role_path }}/files/charts/default"
+    name: default
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/default.values.yml') | from_yaml }}"
 
 - name: apply cronjobs
   k8s:

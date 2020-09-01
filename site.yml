@@ -8,32 +8,18 @@
   tags:
     - cluster
 
-- name: setup first node
-  hosts: k3s_firstnode
+- name: Install k3s using k3sup
+  hosts: localhost
+  connection: local
+  tags:
+    - test
   gather_facts: true
   roles:
-    - { role: k3s, server_role: "first" }
-  tags:
-    - bootstrap
-
-- name: setup servers
-  hosts: k3s_servers
-  gather_facts: true
-  roles:
-    - { role: k3s, server_role: "server" }
-  tags:
-    - bootstrap
-
-- name: setup servers
-  hosts: k3s_agents
-  gather_facts: true
-  roles:
-    - { role: k3s, server_role: "agent" }
-  tags:
-    - bootstrap
+    - { role: k3s }
 
 - name: deploy cluster
   hosts: localhost
+  # hosts: k3s_firstnode
   gather_facts: true
   roles:
     - { role: k3s_deploy }

@@ -1,0 +1,30 @@
+dependencies:
+- name: lidarr
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: radarr
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: sonarr
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: nzbget
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.3
+- name: sabnzbd
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: nzbhydra
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.4
+- name: ombi
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: beets
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+- name: jellyfin
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+digest: sha256:f6574ca719a4ecf7e35c11983080697dc55116a8178d4cba6c2cb6d2079de385
+generated: "2020-08-29T14:21:24.054428-05:00"

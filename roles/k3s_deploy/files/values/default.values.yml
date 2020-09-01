@@ -1,0 +1,306 @@
+homebridge:
+  replicaCount: 1
+
+  image:
+    repository: oznu/homebridge
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  config_ui_port: 8888
+  loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
+
+  env:
+    - name: UID
+      value: "1026"
+    - name: GID
+      value: "100"
+    - name: tz
+      value: America/Chicago
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    path: /
+    hosts:
+      - homebridge.pmcd.io
+    tls:
+      - secretName: homebridge-prod-tls
+        hosts:
+          - homebridge.pmcd.io
+
+  volumes:
+    - name: homebridge
+      persistentVolumeClaim:
+        claimName: nfs-config-homebridge-claim
+
+  volumeMounts:
+    - name: homebridge
+      mountPath: "/homebridge"
+
+  resources:
+    requests:
+      memory: 2048Mi
+      cpu: 1
+    limits:
+      memory: 4096Mi
+      cpu: 5
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+  annotations:
+    "consul.hashicorp.com/connect-inject": "true"
+
+ghost:
+  replicaCount: 1
+
+  image:
+    repository: ghost
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  uid: 1026
+  gid: 100
+
+  env:
+    - name: url
+      value: https://blog.pmcd.io
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+
+    path: /
+    hosts:
+      - blog.pmcd.io
+    tls:
+      - secretName: "ghost-prod-tls"
+        hosts:
+          - blog.pmcd.io
+
+  volumes:
+    - name: content
+      persistentVolumeClaim:
+        claimName: nfs-config-ghost-claim
+
+  volumeMounts:
+    - name: content
+      mountPath: /var/lib/ghost/content
+
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 256Mi
+      cpu: 0.5
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+  # annotations:
+  #   "consul.hashicorp.com/connect-inject": "true"
+
+influxdb:
+  ## influxdb image version
+  ## ref: https://hub.docker.com/r/library/influxdb/tags/
+  image:
+    repository: "influxdb"
+    tag: "1.8"
+    pullPolicy: IfNotPresent
+
+  serviceAccount:
+    create: true
+    name:
+    annotations: {}
+
+  ## Persist data to a persistent volume
+  ##
+  persistence:
+    enabled: true
+    existingClaim: nfs-data-influxdb-claim
+
+  setDefaultUser:
+    user:
+      existingSecret: influxdb-auth
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 0.1
+    limits:
+      memory: 1Gi
+      cpu: 1
+
+  # Annotations to be added to InfluxDB pods
+  # podAnnotations:
+  #   "consul.hashicorp.com/connect-inject": "true"
+
+  ingress:
+    enabled: true
+    tls: true
+    secretName: influxdb-prod-tls
+    hostname: influxdb.pmcd.io
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    path: /
+
+metabase:
+  # Currently Metabase is not horizontly scalable. See
+  # https://github.com/metabase/metabase/issues/1446 and
+  # https://github.com/metabase/metabase/issues/2754
+  # NOTE: Should remain 1
+  replicaCount: 1
+  podAnnotations:
+    "consul.hashicorp.com/connect-inject": "true"
+  podLabels: {}
+  image:
+    repository: metabase/metabase
+    tag: v0.36.3
+    pullPolicy: IfNotPresent
+
+  ## String to fully override metabase.fullname template
+  ##
+  # fullnameOverride:
+
+  # Config Jetty web server
+  listen:
+    host: "0.0.0.0"
+    port: 3000
+  ssl:
+    # If you have an ssl certificate and would prefer to have Metabase run over HTTPS
+    enabled: false
+    # port: 8443
+    # keyStore: |-
+    #   << JKS KEY STORE >>
+    # keyStorePassword: storepass
+  jetty:
+  #  maxThreads: 254
+  #  minThreads: 8
+  #  maxQueued: -1
+  #  maxIdleTime: 60000
+
+  # Backend database
+  database:
+    # Database type (h2 / mysql / postgres), default: h2
+    type: postgres
+    # encryptionKey: << YOUR ENCRYPTION KEY >>
+    ## Only need when you use mysql / postgres
+    # host:
+    # port:
+    # dbname:
+    # username:
+    # password:
+    ## Alternatively, use a connection URI for full configurability. Example for SSL enabled Postgres.
+    # connectionURI: postgres://user:password@host:port/database?ssl=true&sslmode=require&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+    ## If a secret with the database credentials already exists, use the following values:
+    existingSecret: metabase-secret
+    # existingSecretUsernameKey:
+    # existingSecretPasswordKey:
+    existingSecretConnectionURIKey: metabase-uri
+
+  password:
+    # Changing Metabase password complexity:
+    # weak: no character constraints
+    # normal: at least 1 digit (default)
+    # strong: minimum 8 characters w/ 2 lowercase, 2 uppercase, 1 digit, and 1 special character
+    complexity: normal
+    length: 6
+
+  timeZone: America/Chicago
+  emojiLogging: true
+  # javaOpts:
+  # pluginsDirectory:
+
+  livenessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 30
+    failureThreshold: 6
+
+  readinessProbe:
+    initialDelaySeconds: 30
+    timeoutSeconds: 3
+    periodSeconds: 5
+
+  service:
+    name: metabase
+    type: ClusterIP
+    externalPort: 80
+    internalPort: 3000
+    # Used to fix NodePort when service.type: NodePort.
+    nodePort:
+    annotations:
+      {}
+      # Used to add custom annotations to the Service.
+      # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0"
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+      nginx.ingress.kubernetes.io/proxy-read-timeout: 600
+      nginx.ingress.kubernetes.io/proxy-send-timeout: 600
+
+    hosts:
+      - metabase.pmcd.io
+    path: /
+    tls:
+      - secretName: "metabase-prod-tls"
+        hosts:
+          - metabase.pmcd.io
+
+  # A custom log4j.properties file can be provided using a multiline YAML string.
+  # See https://github.com/metabase/metabase/blob/master/resources/log4j.properties
+  #
+  # log4jProperties:
+
+  resources:
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 1024Mi
+      cpu: 2.0
+
+  ## Node labels for pod assignment
+  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+  #
+  nodeSelector:
+    beta.kubernetes.io/arch: amd64
+
+  ## Tolerations for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  ##
+  tolerations: []
+
+  ## Affinity for pod assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  ##
+  affinity: {}

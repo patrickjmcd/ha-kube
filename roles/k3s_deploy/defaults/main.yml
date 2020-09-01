@@ -1,1 +1,2 @@
 ---
+secrets_mount_point: "192.168.1.252:/volume1/kubesecrets"

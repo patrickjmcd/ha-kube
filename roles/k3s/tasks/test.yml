@@ -1,0 +1,45 @@
+- block:
+    - name: create a token
+      shell: echo $(hostname) $(date +%s) | shasum | base64
+      register: tkn
+
+    - name: Install k3s on first node
+      shell: curl -sfL https://get.k3s.io | sh -s - server \
+        --datastore-endpoint="postgres://kube:kube@192.168.1.250:5432/kube" \
+        --write-kubeconfig-mode 644 \
+        --no-deploy servicelb \
+        --no-deploy traefik \
+        --cluster-init \
+        --token "{{ tkn.stdout }}"
+
+    - name: Grab kubeconfig
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~/.kube/config
+        flat: yes
+      notify:
+        - fix kubeconfig
+  when: server_role == "first"
+  tags:
+    - bootstrap
+
+- name: Install k3s on server nodes
+  shell: curl -sfL https://get.k3s.io | sh -s - server \
+    --datastore-endpoint="postgres://kube:kube@192.168.1.250:5432/kube" \
+    --write-kubeconfig-mode 644 \
+    --no-deploy servicelb \
+    --no-deploy traefik \
+    --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
+  when: server_role == "server"
+  tags:
+    - bootstrap
+
+- name: Install k3s on worker nodes
+  shell: curl -sfL https://get.k3s.io | sh
+  environment:
+    K3S_TOKEN: "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
+    K3S_KUBECONFIG_MODE: "644"
+    K3S_URL: "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443"
+  when: server_role == "agent"
+  tags:
+    - bootstrap
