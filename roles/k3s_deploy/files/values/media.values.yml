@@ -8,17 +8,20 @@ beets:
     port: 80
 
   ingress:
-    enabled: false
+    enabled: true
     annotations:
       kubernetes.io/ingress.class: nginx
-      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
     path: /
     hosts:
-      - beets.patrickjmcd.org
+      - beets.pmcd.io
     tls:
-      - secretName: beets-patrickjmcd-org
+      - secretName: "beets-prod-tls"
         hosts:
-          - beets.patrickjmcd.org
+          - beets.pmcd.io
 
   volumes:
     - name: downloads
@@ -111,6 +114,9 @@ jellyfin:
       cpu: 2
 
 lidarr:
+  image:
+    repository: patrickjmcd/lidarr
+    tag: latest
   replicaCount: 1
 
   env:
@@ -169,8 +175,8 @@ lidarr:
     consul.hashicorp.com/connect-inject: "true"
     consul.hashicorp.com/connect-service-upstreams: "nzbget:6789,nzbhydra:5076,sabnzbd:8080"
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
 nzbget:
   env:
@@ -221,8 +227,8 @@ nzbget:
   annotations:
     consul.hashicorp.com/connect-inject: "true"
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
 nzbhydra:
   replicaCount: 1
@@ -276,8 +282,8 @@ nzbhydra:
     consul.hashicorp.com/connect-inject: "true"
     consul.hashicorp.com/connect-service-upstreams: "nzbget:6789,sabnzbd:8080"
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
 ombi:
   replicaCount: 1
@@ -375,8 +381,8 @@ radarr:
     consul.hashicorp.com/connect-inject: "true"
     consul.hashicorp.com/connect-service-upstreams: "nzbget:6789,nzbhydra:5076,sabnzbd:8080"
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
 sonarr:
   replicaCount: 1
@@ -434,8 +440,8 @@ sonarr:
     consul.hashicorp.com/connect-inject: "true"
     consul.hashicorp.com/connect-service-upstreams: "nzbget:6789,nzbhydra:5076,sabnzbd:8080"
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
 sabnzbd:
   replicaCount: 1
@@ -484,6 +490,51 @@ sabnzbd:
       cpu: 1.0
   annotations:
     consul.hashicorp.com/connect-inject: "true"
+  # nodeSelector:
+  #     beta.kubernetes.io/arch: amd64
 
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+airsonic:
+  service:
+    type: LoadBalancer
+    port: 4040
+
+  PUID: 1026
+  PGID: 100
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+    path: /
+    hosts:
+      - subsonic.pmcd.io
+    tls:
+      - secretName: "airsonic-prod-tls"
+        hosts:
+          - subsonic.pmcd.io
+
+  volumes:
+    - name: config
+      persistentVolumeClaim:
+        claimName: nfs-config-airsonic-claim
+    - name: music
+      persistentVolumeClaim:
+        claimName: nfs-music-claim
+
+  volumeMounts:
+    - name: config
+      mountPath: "/config"
+    - name: music
+      mountPath: "/music"
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 0.1
+    limits:
+      memory: 2048Mi
+      cpu: 2
+
+  nodeSelector: {}

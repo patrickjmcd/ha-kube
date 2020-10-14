@@ -26,5 +26,8 @@ dependencies:
 - name: jellyfin
   repository: https://patrickjmcd.github.io/helm-charts
   version: 0.2.2
-digest: sha256:f6574ca719a4ecf7e35c11983080697dc55116a8178d4cba6c2cb6d2079de385
-generated: "2020-08-29T14:21:24.054428-05:00"
+- name: airsonic
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.3
+digest: sha256:74736fb7db0406e959af0dd4f07e3286ebf237dd6f875418f2a55f6d3946e6c4
+generated: "2020-09-20T00:16:31.815684-05:00"

@@ -4,45 +4,68 @@
   hosts: k3s_servers:k3s_firstnode:k3s_agents
   gather_facts: true
   roles:
-    - { role: cluster }
+      - { role: cluster }
   tags:
-    - cluster
+      - cluster
 
-- name: Install k3s using k3sup
-  hosts: localhost
-  connection: local
-  tags:
-    - test
+# - name: Install k3s using k3sup
+#   hosts: localhost
+#   connection: local
+#   tags:
+#       - test
+#   gather_facts: true
+#   roles:
+#       - { role: k3s }
+
+- name: setup first node
+  hosts: k3s_firstnode
   gather_facts: true
   roles:
-    - { role: k3s }
+      - { role: k3s, server_role: "first" }
+  tags:
+      - bootstrap
+
+- name: setup servers
+  hosts: k3s_servers
+  gather_facts: true
+  roles:
+      - { role: k3s, server_role: "server" }
+  tags:
+      - bootstrap
+
+- name: setup servers
+  hosts: k3s_agents
+  gather_facts: true
+  roles:
+      - { role: k3s, server_role: "agent" }
+  tags:
+      - bootstrap
 
 - name: deploy cluster
   hosts: localhost
   # hosts: k3s_firstnode
   gather_facts: true
   roles:
-    - { role: k3s_deploy }
+      - { role: k3s_deploy }
   tags:
-    - deploy
+      - deploy
 
 # TEARDOWN SCRIPT
 - hosts: k3s_servers:k3s_firstnode:k3s_agents
   become: yes
   tags:
-    - teardown
+      - teardown
   roles:
-    - { role: k3s_teardown }
-
-- hosts: localhost
-  connection: local
-  tags:
-    - teardown
-  tasks:
-    - name: Clear postgres database
-      postgresql_query:
-        login_host: 192.168.1.250
-        db: kube
-        login_user: kube
-        login_password: kube
-        query: DROP TABLE kine
+      - { role: k3s_teardown }
+# - hosts: localhost
+#   connection: local
+#   tags:
+#     - teardown
+#   tasks:
+#     - name: Clear postgres database
+#       postgresql_query:
+#         login_host: 192.168.1.250
+#         db: kube
+#         login_user: kube
+#         login_password: kube
+#         query: DROP TABLE kine

@@ -4,12 +4,9 @@ dependencies:
   version: 4.8.4
 - name: ghost
   repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.1.0
+  version: 0.2.2
 - name: homebridge
   repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.1.2
-- name: metabase
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 0.12.1
-digest: sha256:fea09765a61f41f731208c40afacc2e5a28604adced956c1c368a6447693feb3
-generated: "2020-08-28T17:27:43.997124-05:00"
+  version: 0.2.2
+digest: sha256:986a9b4a788fa73543bef19f558aef25b5e22a9e3c3d2170dc20fd9ae77cd43a
+generated: "2020-09-21T11:20:15.431263-05:00"

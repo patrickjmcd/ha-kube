@@ -23,7 +23,6 @@ version: 0.1.0
 appVersion: 1.16.0
 
 dependencies:
-
     - name: lidarr
       version: 0.2.2
       repository: "https://patrickjmcd.github.io/helm-charts"
@@ -35,7 +34,7 @@ dependencies:
     - name: sonarr
       version: 0.2.2
       repository: "https://patrickjmcd.github.io/helm-charts"
-    
+
     - name: nzbget
       version: 0.2.3
       repository: "https://patrickjmcd.github.io/helm-charts"
@@ -59,4 +58,7 @@ dependencies:
     - name: jellyfin
       version: 0.2.2
       repository: "https://patrickjmcd.github.io/helm-charts"
-    
+
+    - name: airsonic
+      version: 0.2.3
+      repository: "https://patrickjmcd.github.io/helm-charts"

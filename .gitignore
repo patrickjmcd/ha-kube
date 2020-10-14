@@ -2,3 +2,4 @@ drone_secrets.sh
 .vscode
 **/secrets/*
 **/secrets_postinstall/*
+*.tgz
