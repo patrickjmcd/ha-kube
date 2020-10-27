@@ -382,7 +382,7 @@ kubeStateMetrics:
 ##
 kube-state-metrics:
   image:
-    tag: latest
+    tag: v1.9.7
     pullPolicy: Always
 
   nodeSelector:

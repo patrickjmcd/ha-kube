@@ -8,6 +8,8 @@ spec:
   successfulJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 120
       template:
         spec:
           imagePullSecrets:

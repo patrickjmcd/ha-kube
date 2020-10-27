@@ -1,14 +1,8 @@
-[dockerservers]
-kube00 ansible_host=192.168.8.100
-
-[dockerservers:vars]
-ansible_python_interpreter=/usr/bin/python3
-
 [k3s_firstnode]
 kube00 ansible_host=192.168.8.100
 
 [k3s_firstnode:vars]
-ansible_ssh_user=patrickjmcd
+ansible_ssh_user=pi
 
 [k3s_servers]
 kube01 ansible_host=192.168.8.101
@@ -18,13 +12,13 @@ kube02 ansible_host=192.168.8.102
 ansible_ssh_user=pi
 
 [k3s_agents]
-# kube01 ansible_host=192.168.8.101
-# kube02 ansible_host=192.168.8.102
 kube03 ansible_host=192.168.8.103
 kube04 ansible_host=192.168.8.104
 kube05 ansible_host=192.168.8.105
-# kube06 ansible_host=192.168.8.106
-# kube07 ansible_host=192.168.8.107
+
+[k3s_incompatible]
+kube06 ansible_host=192.168.8.106
+kube07 ansible_host=192.168.8.107
 
 [k3s_agents:vars]
 ansible_ssh_user=pi

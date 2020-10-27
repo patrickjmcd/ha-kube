@@ -8,5 +8,8 @@ dependencies:
 - name: homebridge
   repository: https://patrickjmcd.github.io/helm-charts
   version: 0.2.2
-digest: sha256:986a9b4a788fa73543bef19f558aef25b5e22a9e3c3d2170dc20fd9ae77cd43a
-generated: "2020-09-21T11:20:15.431263-05:00"
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.8.4
+digest: sha256:bfe405c96b1863947e97f39dd89d6b2e8d3bb408ab4a70b30fb64d4695d5932e
+generated: "2020-10-27T09:26:13.257526-05:00"

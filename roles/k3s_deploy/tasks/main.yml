@@ -54,6 +54,14 @@
       state: present
   tags:
       - namespaces
+      
+- name: create fantasyfootball namespace
+k8s:
+    name: fantasyfootball
+    kind: Namespace
+    state: present
+tags:
+    - namespaces
 
 # - name: grab cert-manager CRDs
 #   get_url:

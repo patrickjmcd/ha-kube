@@ -1,0 +1,39 @@
+replicaCount: 1
+
+image:
+    repository: registry.pmcd.io/ff-nginx # the image of the web server you'd like to run
+    tag: latest
+    pullPolicy: IfNotPresent
+    imagePullSecretName: registry-cred
+
+service:
+    type: ClusterIP
+    port: 80
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    path: /
+    hosts:
+        - fhff.pmcd.io
+    tls:
+        - secretName: fhff-prod-tls
+          hosts:
+              - fhff.pmcd.io
+
+resources:
+    requests:
+        memory: 128Mi
+        cpu: 0.1
+    limits:
+        memory: 256Mi
+        cpu: 0.5
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

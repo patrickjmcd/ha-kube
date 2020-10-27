@@ -1,0 +1,9 @@
+dependencies:
+- name: nginx
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.3
+- name: strapi
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.3
+digest: sha256:c5286dfc446618c24f935febe269951327fd7a199c1e8219a010b09bac254303
+generated: "2020-10-27T09:34:02.810423-05:00"

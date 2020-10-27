@@ -2,3 +2,4 @@
 server_ip_address: "{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}"
 ssh_key_location: ~/.ssh/swarm
 kubeconfig_path: /Users/patrickjmcd/.kube/config
+multi_master: false
