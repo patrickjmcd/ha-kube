@@ -1,15 +1,14 @@
-
 strapi:
   replicaCount: 1
 
   image:
-      repository: strapi/strapi
-      tag: latest
-      pullPolicy: IfNotPresent
+    repository: strapi/strapi
+    tag: latest
+    pullPolicy: IfNotPresent
 
   env:
-      database_client: postgres
-      database_port: 5432
+    database_client: postgres
+    database_port: 5432
 
   # you must create a secret in the same namespace with the following keys:
   #    - database_host
@@ -18,39 +17,39 @@ strapi:
   database_secret_name: strapi-secret
 
   service:
-      type: ClusterIP
-      port: 80
+    type: ClusterIP
+    port: 80
 
   ingress:
-      enabled: true
-      annotations:
-          kubernetes.io/ingress.class: nginx
-          cert-manager.io/cluster-issuer: "letsencrypt-prod"
-          nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-      path: /
-      hosts:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    path: /
+    hosts:
+      - strapi.pmcd.io
+    tls:
+      - secretName: strapi-prod-tls
+        hosts:
           - strapi.pmcd.io
-      tls:
-          - secretName: strapi-prod-tls
-            hosts:
-                - strapi.pmcd.io
 
   volumes:
-      - name: strapi-volume
-        persistentVolumeClaim:
-            claimName: nfs-data-strapi-claim
+    - name: strapi-volume
+      persistentVolumeClaim:
+        claimName: nfs-data-strapi-claim
 
   volumeMounts:
-      - name: strapi-volume
-        mountPath: "/srv/app"
+    - name: strapi-volume
+      mountPath: "/srv/app"
 
   resources:
-      requests:
-          memory: 128Mi
-          cpu: 0.1
-      limits:
-          memory: 256Mi
-          cpu: 0.5
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 256Mi
+      cpu: 0.5
 
   nodeSelector:
     beta.kubernetes.io/arch: amd64
@@ -61,42 +60,41 @@ strapi:
 
 nginx:
   replicaCount: 1
-  
+
   image:
-      repository: registry.pmcd.io/ff-nginx # the image of the web server you'd like to run
-      tag: latest
-      pullPolicy: IfNotPresent
-      imagePullSecretName: registry-cred
-  
+    repository: registry.pmcd.io/ff-nginx # the image of the web server you'd like to run
+    tag: latest
+    pullPolicy: Always
+    imagePullSecretName: registry-cred
+
   service:
-      type: ClusterIP
-      port: 80
-  
+    type: ClusterIP
+    port: 80
+
   ingress:
-      enabled: true
-      annotations:
-          kubernetes.io/ingress.class: nginx
-          cert-manager.io/cluster-issuer: "letsencrypt-prod"
-          nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-      path: /
-      hosts:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    path: /
+    hosts:
+      - fhff.pmcd.io
+    tls:
+      - secretName: fhff-prod-tls
+        hosts:
           - fhff.pmcd.io
-      tls:
-          - secretName: fhff-prod-tls
-            hosts:
-                - fhff.pmcd.io
-  
+
   resources:
-      requests:
-          memory: 128Mi
-          cpu: 0.1
-      limits:
-          memory: 256Mi
-          cpu: 0.5
-  
+    requests:
+      memory: 128Mi
+      cpu: 0.1
+    limits:
+      memory: 256Mi
+      cpu: 0.5
+
   nodeSelector: {}
-  
+
   tolerations: []
-  
+
   affinity: {}
-  

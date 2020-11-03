@@ -15,6 +15,7 @@ ansible_ssh_user=pi
 kube03 ansible_host=192.168.8.103
 kube04 ansible_host=192.168.8.104
 kube05 ansible_host=192.168.8.105
+kube08 ansible_host=192.168.8.108
 
 [k3s_incompatible]
 kube06 ansible_host=192.168.8.106

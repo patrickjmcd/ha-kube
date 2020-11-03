@@ -1,90 +1,49 @@
-# - name: Install k3s on first node
-#   shell: k3sup install \
-#       --user {{ hostvars[item]['ansible_ssh_user'] }} \
-#       --ip {{ hostvars[item]['ansible_host'] }} \
-#       --k3s-extra-args="--no-deploy traefik --no-deploy servicelb" \
-#       --ssh-key={{ ssh_key_location }} \
-#       --local-path={{ kubeconfig_path }}
-#       -- cluster
-#   with_items:
-#       - "{{ groups['k3s_firstnode'] }}"
-
-# - name: Install k3s on server nodes
-#   shell: k3sup join \
-#       --user {{ hostvars[item]['ansible_ssh_user'] }} \
-#       --ip {{ hostvars[item]['ansible_host'] }} \
-#       --server \
-#       --k3s-extra-args="--no-deploy traefik --no-deploy servicelb" \
-#       --server-user patrickjmcd \
-#       --server-ip {{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }} \
-#       --ssh-key=~/.ssh/swarm
-#   tags:
-#       - bootstrap
-#   with_items:
-#       - "{{ groups['k3s_servers'] }}"
-
-# - name: Install k3s on worker nodes
-#   shell: k3sup join \
-#       --user pi \
-#       --ip {{ hostvars[item]['ansible_host'] }} \
-#       --server-user patrickjmcd \
-#       --server-ip {{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }} \
-#       --ssh-key=~/.ssh/swarm
-#   with_items:
-#       - "{{ groups['k3s_agents'] }}"
-#   tags:
-#       - bootstrap
-
 - block:
-      - name: create a token
-        shell: echo $(hostname) $(date +%s) | shasum | base64
-        register: tkn
+    - name: create a token
+      shell: echo $(hostname) $(date +%s) | shasum | base64
+      register: tkn
 
-      - name: Install k3s on first node
-        shell:
-            curl -sfL https://get.k3s.io | sh -s - server \
-            --write-kubeconfig-mode 644 \
-            --no-deploy servicelb \
-            --no-deploy traefik \
-            --token "{{ tkn.stdout }}"
-            --cluster-init
-        ignore_errors: True
-        environment:
-            INSTALL_K3S_VERSION: v1.19.2+k3s1
+    - name: Install k3s on first node
+      shell: curl -sfL https://get.k3s.io | sh -s - server \
+        --write-kubeconfig-mode 644 \
+        --no-deploy servicelb \
+        --no-deploy traefik \
+        --token "{{ tkn.stdout }}"
+        --cluster-init
+      ignore_errors: True
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
 
-      - name: Grab kubeconfig
-        fetch:
-            src: /etc/rancher/k3s/k3s.yaml
-            dest: ~/.kube/config
-            flat: yes
-        notify:
-            - fix kubeconfig
+    - name: Grab kubeconfig
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: ~/.kube/config
+        flat: yes
+      notify:
+        - fix kubeconfig
   when: server_role == "first"
   tags:
-      - bootstrap
+    - bootstrap
 
 - name: Install k3s on server nodes
   shell: curl -sfL https://get.k3s.io | sh -s - server \
-      --write-kubeconfig-mode 644 \
-      --no-deploy servicelb \
-      --no-deploy traefik \
-      --server "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443" \
-      --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
+    --server "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443" \
+    --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
   ignore_errors: True
   environment:
-      INSTALL_K3S_VERSION: v1.19.3+k3s1
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
   when: (server_role == "server") and (multi_master == true)
   tags:
-      - bootstrap
+    - bootstrap
 
 - name: Install k3s on worker nodes
   shell: curl -sfL https://get.k3s.io | sh
   ignore_errors: True
   environment:
-      K3S_TOKEN: "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
-      K3S_KUBECONFIG_MODE: "644"
-      K3S_URL: "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443"
-      INSTALL_K3S_VERSION: v1.19.3+k3s1
+    K3S_TOKEN: "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
+    K3S_KUBECONFIG_MODE: "644"
+    K3S_URL: "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443"
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
   when: ((server_role == "agent") and (multi_master == true)) or ((server_role != "first") and (multi_master == false))
   tags:
-      - bootstrap
+    - bootstrap

@@ -13,9 +13,12 @@ extraArgs:
   email-domain: "*"
 
 image:
-  repository: "quay.io/oauth2-proxy/oauth2-proxy"
-  tag: "latest"
-  pullPolicy: "Always"
+  # repository: "quay.io/oauth2-proxy/oauth2-proxy"
+  repository: registry.pmcd.io/oauth2-proxy
+  tag: latest
+  pullPolicy: Always
+imagePullSecrets: 
+  - name: registry-cred
 
 # authenticatedEmailsFile:
 #   enabled: true
@@ -48,5 +51,3 @@ htpasswdFile:
   # entries:
   #  - testuser:{SHA}EWhzdhgoYJWy0z2gyzhRYlN9DSiv
 
-nodeSelector:
-  beta.kubernetes.io/arch: amd64

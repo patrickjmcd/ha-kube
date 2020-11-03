@@ -1,9 +1,9 @@
 ---
 - name: install pip modules
   pip:
-      name:
-          - openshift
-          - pyhelm
+    name:
+      - openshift
+      - pyhelm
 
 # - name: pull secrets
 #   shell: "rsync -aP nas:/volume1/kube-secrets/secrets/ /tmp/secrets/"
@@ -17,50 +17,50 @@
 
 - name: create drone namespace
   k8s:
-      name: drone
-      kind: Namespace
-      state: present
+    name: drone
+    kind: Namespace
+    state: present
   tags:
-      - namespaces
+    - namespaces
 
 - name: create monitoring namespace
   k8s:
-      name: monitoring
-      kind: Namespace
-      state: present
+    name: monitoring
+    kind: Namespace
+    state: present
   tags:
-      - namespaces
+    - namespaces
 
 - name: create cron namespace
   k8s:
-      name: cron
-      kind: Namespace
-      state: present
+    name: cron
+    kind: Namespace
+    state: present
   tags:
-      - namespaces
+    - namespaces
 
 - name: create media namespace
   k8s:
-      name: media
-      kind: Namespace
-      state: present
+    name: media
+    kind: Namespace
+    state: present
   tags:
-      - namespaces
+    - namespaces
 
 - name: create cert-manager namespace
   k8s:
-      name: cert-manager
-      kind: Namespace
-      state: present
+    name: cert-manager
+    kind: Namespace
+    state: present
   tags:
-      - namespaces
-      
+    - namespaces
+
 - name: create fantasyfootball namespace
-k8s:
+  k8s:
     name: fantasyfootball
     kind: Namespace
     state: present
-tags:
+  tags:
     - namespaces
 
 # - name: grab cert-manager CRDs
@@ -76,37 +76,37 @@ tags:
 
 - name: apply secrets
   k8s:
-      state: present
-      src: "{{ item }}"
+    state: present
+    src: "{{ item }}"
   with_fileglob:
-      # - "/tmp/secrets/*.yml"
-      - "{{ role_path }}/files/secrets/*.yml"
+    # - "/tmp/secrets/*.yml"
+    - "{{ role_path }}/files/secrets/*.yml"
   tags:
-      - secrets
+    - secrets
 
 - name: apply storage
   k8s:
-      state: present
-      src: "{{ item }}"
+    state: present
+    src: "{{ item }}"
   with_fileglob:
-      - "files/storage/*.yml"
+    - "files/storage/*.yml"
   tags:
-      - storage
+    - storage
 
 - include: helm_kube-system.yml
   tags:
-      - helm
-      - helm-kube-system
+    - helm
+    - helm-kube-system
 
 - include: helm_drone.yml
   tags:
-      - helm
-      - helm-drone
+    - helm
+    - helm-drone
 
 - include: helm_monitoring.yml
   tags:
-      - helm
-      - helm-monitoring
+    - helm
+    - helm-monitoring
 
 # - name: Add hashicorp repository
 #   community.kubernetes.helm_repository:
@@ -133,75 +133,83 @@ tags:
 - name: Install media helm chart
   ignore_errors: yes # needed to keep going
   community.kubernetes.helm:
-      chart_ref: "{{ role_path }}/files/charts/media"
-      name: media
-      release_namespace: media
-      values: "{{ lookup('file', 'files/values/media.values.yml') | from_yaml }}"
+    chart_ref: "{{ role_path }}/files/charts/media"
+    name: media
+    release_namespace: media
+    values: "{{ lookup('file', 'files/values/media.values.yml') | from_yaml }}"
 
 - name: Install default helm chart
   ignore_errors: yes # needed to keep going
   community.kubernetes.helm:
-      chart_ref: "{{ role_path }}/files/charts/default"
-      name: default
-      release_namespace: default
-      values: "{{ lookup('file', 'files/values/default.values.yml') | from_yaml }}"
+    chart_ref: "{{ role_path }}/files/charts/default"
+    name: default
+    release_namespace: default
+    values: "{{ lookup('file', 'files/values/default.values.yml') | from_yaml }}"
+
+- name: Install fantasyfootball helm chart
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: "{{ role_path }}/files/charts/fantasyfootball"
+    name: fantasyfootball
+    release_namespace: fantasyfootball
+    values: "{{ lookup('file', 'files/values/fantasyfootball.values.yml') | from_yaml }}"
 
 - name: apply cronjobs
   k8s:
-      state: present
-      src: "{{ item }}"
+    state: present
+    src: "{{ item }}"
   with_fileglob:
-      - "files/cronjobs/*.yml"
+    - "files/cronjobs/*.yml"
 
 - name: apply unifi
   k8s:
-      state: present
-      src: "{{ item }}"
+    state: present
+    src: "{{ item }}"
   with_fileglob:
-      - "files/unifi/*.yml"
+    - "files/unifi/*.yml"
 
 - name: grab kube-dashboard
   get_url:
-      url: "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.1/aio/deploy/alternative.yaml"
-      dest: /tmp/dashboard.yml
-      mode: 0777
+    url: "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.1/aio/deploy/alternative.yaml"
+    dest: /tmp/dashboard.yml
+    mode: 0777
   tags:
-      - dashboard
+    - dashboard
 
 - name: apply kube-dashboard
   k8s:
-      state: present
-      src: /tmp/dashboard.yml
+    state: present
+    src: /tmp/dashboard.yml
   tags:
-      - dashboard
+    - dashboard
 
 - name: apply kube-dashboard admin-user
   k8s:
-      state: present
-      src: "{{ role_path }}/files/dashboard/dashboard.admin-user.yml"
+    state: present
+    src: "{{ role_path }}/files/dashboard/dashboard.admin-user.yml"
   tags:
-      - dashboard
+    - dashboard
 
 - name: get dashboard bearer token
   shell: echo $(kubectl -n kubernetes-dashboard get secret -o jsonpath="{.data.token}" $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') | base64 --decode)
   register: tkn
   tags:
-      - dashboard
+    - dashboard
 
 - name: make dashboard ingress file
   template:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-      mode: u=rw,g=r,o=r
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: u=rw,g=r,o=r
   with_items:
-      - src: dashboard.ingress.j2
-        dest: /tmp/dashboard.ingress.yml
+    - src: dashboard.ingress.j2
+      dest: /tmp/dashboard.ingress.yml
   tags:
-      - dashboard
+    - dashboard
 
 - name: apply kube-dashboard ingress
   k8s:
-      state: present
-      src: /tmp/dashboard.ingress.yml
+    state: present
+    src: /tmp/dashboard.ingress.yml
   tags:
-      - dashboard
+    - dashboard
