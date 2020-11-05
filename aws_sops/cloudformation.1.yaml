@@ -1,0 +1,17 @@
+Resources:
+  OperatorUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: 'kms.user'
+  OperatorAccessKey:
+    Type: 'AWS::IAM::AccessKey'
+    Properties:
+      UserName:
+        !Ref OperatorUser
+
+Outputs:
+  OperatorAccessKeyOutput:
+    Value:
+      !Ref OperatorAccessKey
+  OperatorSecretKeyOutput:
+    Value: !GetAtt OperatorAccessKey.SecretAccessKey

@@ -1,5 +1,5 @@
 drone_secrets.sh
 .vscode
-**/secrets/*
+**/secrets_decrypted/*
 **/secrets_postinstall/*
 *.tgz

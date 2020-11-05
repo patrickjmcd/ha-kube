@@ -1,0 +1,53 @@
+Resources:
+  OperatorUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: 'kms.user'
+  OperatorAccessKey:
+    Type: 'AWS::IAM::AccessKey'
+    Properties:
+      UserName:
+        !Ref OperatorUser
+
+  KMSKey:
+      Type: AWS::KMS::Key
+      Properties:
+        KeyPolicy:
+          Version: 2012-10-17
+          Statement:
+            - Sid: Enable Root IAM User Permissions
+              Effect: Allow
+              Principal:
+                AWS: !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - ':root'
+              Action: 'kms:*'
+              Resource: '*'
+            - Sid: Enable User Permissions
+              Effect: Allow
+              Principal:
+                AWS: !Join
+                  - ''
+                  - - 'arn:aws:iam::'
+                    - !Ref 'AWS::AccountId'
+                    - ':user/kms.user'
+              Action:
+                - "kms:DescribeKey"
+                - "kms:Encrypt"
+                - "kms:Decrypt"
+                - "kms:ReEncrypt*"
+                - "kms:GenerateDataKey"
+                - "kms:GenerateDataKeyWithoutPlaintext"
+              Resource: '*'
+
+Outputs:
+  OperatorAccessKeyOutput:
+    Value:
+      !Ref OperatorAccessKey
+  OperatorSecretKeyOutput:
+    Value: !GetAtt OperatorAccessKey.SecretAccessKey
+  KMSArn:
+    Value:
+      !GetAtt KMSKey.Arn

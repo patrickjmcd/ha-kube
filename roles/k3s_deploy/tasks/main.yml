@@ -63,6 +63,14 @@
   tags:
     - namespaces
 
+- name: decrypt secrets
+  shell: "sops -d --output {{ role_path }}/files/secrets_decrypted/{{ item | basename }} {{ item|quote }}"
+  with_fileglob:
+    - "{{ role_path }}/files/secrets/*.yaml"
+  tags:
+    - secrets
+
+
 # - name: grab cert-manager CRDs
 #   get_url:
 #     url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.crds.yaml"
@@ -80,7 +88,7 @@
     src: "{{ item }}"
   with_fileglob:
     # - "/tmp/secrets/*.yml"
-    - "{{ role_path }}/files/secrets/*.yml"
+    - "{{ role_path }}/files/secrets_decrypted/*.yaml"
   tags:
     - secrets
 
