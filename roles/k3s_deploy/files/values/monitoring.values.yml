@@ -1,0 +1,182 @@
+chronograf:
+  ## Image Settings
+  ##
+  image:
+    repository: "chronograf"
+    ## default: quay.io/influxdb/chronograf
+    tag: 1.8.8
+    pullPolicy: IfNotPresent
+
+  service:
+    replicas: 1
+    type: ClusterIP
+
+  ## Persist data to a persistent volume
+  ##
+  persistence:
+    enabled: true
+    existingClaim: nfs-data-chronograf-claim
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 0.1
+    limits:
+      memory: 2Gi
+      cpu: 2
+
+  ## Configure the ingress object to hook into existing infastructure
+  ## ref : http://kubernetes.io/docs/user-guide/ingress/
+  ## OPTIONALLY you can set .Values.ingress.secretName to set which secret to use
+  ##
+  ingress:
+    enabled: true
+    tls: true
+    hostname: chronograf.pmcd.io
+    annotations: 
+      kubernetes.io/ingress.class: "nginx"
+      secretName: chronograf-tls-cert
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+      nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    path: /
+
+loki-stack:
+  loki:
+    enabled: true
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 0.1
+      limits:
+        memory: 512Mi
+        cpu: 1.0
+
+  promtail:
+    enabled: true
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 0.1
+      limits:
+        memory: 512Mi
+        cpu: 1.0
+
+  fluent-bit:
+    enabled: false
+
+  grafana:
+    enabled: false
+
+  prometheus:
+    enabled: false
+
+kapacitor:
+  ## kapacitor image version
+  ## ref: https://hub.docker.com/r/library/kapacitor/tags/
+  ##
+  image:
+    repository: "kapacitor"
+    tag: "1.5.7"
+    pullPolicy: "IfNotPresent"
+
+  ## Specify a service type, defaults to NodePort
+  ## ref: http://kubernetes.io/docs/user-guide/services/
+  ##
+  service:
+    type: ClusterIP
+
+  ## Persist data to a persistent volume
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ##
+  persistence:
+    enabled: true
+    ## kapacitor data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
+    # storageClass: "-"
+    accessMode: ReadWriteOnce
+    size: 8Gi
+    existingClaim: "nfs-data-kapacitor-claim"
+
+  ## Configure resource requests and limits
+  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  ##
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 0.1
+    limits:
+      memory: 2Gi
+      cpu: 2
+
+  ## Set the environment variables for kapacitor (or anything else you want to use)
+  ## ref: https://hub.docker.com/_/kapacitor/
+  ## ref: https://docs.influxdata.com/kapacitor/latest/administration/configuration/
+  ##
+  # Examples below
+  #
+  # envVars:
+  #   KAPACITOR_SLACK_ENABLED: true
+  #   KAPACITOR_SLACK_URL: "http://slack.com/xxxxx/xxxxx/xxxx/xxxxxxx"
+  #   KAPACITOR_HTTP_LOG_ENABLED: true
+  #   KAPACITOR_LOGGING_LEVEL: "INFO"
+  #
+  # or, at your terminal, with
+  #
+  # helm install --name kapacitor-rls --set influxURL=http://influxurl.com,envVars.KAPACITOR_SLACK_ENABLED=true,envVars.KAPACITOR_SLACK_URL="http://slack.com/xxxxx/xxxxx/xxxx/xxxxxxx" influxdata/kapacitor
+
+  ## Set the URL of InfluxDB instance to create subscription on
+  ## ref: https://docs.influxdata.com/kapacitor/v1.1/introduction/getting_started/
+  ##
+  # influxURL: http://influxdb-influxdb.tick:8086
+  influxURL: https://influxdb.pmcd.io
+
+  ## Name of an existing Secrect used to set the environment variables for the
+  ## InfluxDB user and password. The expected keys in the secret are
+  ## `influxdb-user` and `influxdb-password`.
+  ##
+  existingSecret: influxdb-auth
+
+  ## Role based access control
+  rbac:
+    create: true
+    namespaced: false
+
+  ## Service account
+  serviceAccount:
+    annotations: {}
+    create: true
+    name:
+
+  ## Sidecars that collect the configmaps with specified label and stores the included files into the respective folders
+  sidecar:
+    image: kiwigrid/k8s-sidecar:0.1.116
+    imagePullPolicy: IfNotPresent
+    resources: {}
+      # limits:
+      #   cpu: 100m
+      #   memory: 100Mi
+      # requests:
+      #   cpu: 50m
+      #   memory: 50Mi
+    ## skipTlsVerify Set to true to skip tls verification for kube api calls
+    # skipTlsVerify: true
+    sideload:
+      enabled: false
+      label: kapacitor_sideload
+      searchNamespace: null
+      folder: /var/lib/kapacitor/sideload
+
+  ## Override the deployment namespace
+  namespaceOverride: ""
+
+
+

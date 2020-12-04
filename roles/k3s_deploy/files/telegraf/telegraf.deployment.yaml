@@ -1,0 +1,145 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telegraf-depl
+  namespace: monitoring
+  labels:
+    k8s-app: telegraf
+data:
+  telegraf.conf: |+
+    [global_tags]
+      env = "$ENV"
+    [agent]
+      hostname = "$HOSTNAME"
+    [[outputs.influxdb]]
+      urls = ["$MONITOR_HOST"] # required
+      timeout = "5s"
+      username = "$MONITOR_USERNAME"
+      password = "$MONITOR_PASSWORD"
+      database = "telegraf"
+      database_tag = "influxdb_database"
+      tagexclude = ["influxdb_database"]
+
+    [[inputs.ping]]
+      urls = ["192.168.8.100", "192.168.8.101", "192.168.8.102", "192.168.8.103", "192.168.8.104", "192.168.8.105", "192.168.8.107", "192.168.8.108"]
+
+    [[inputs.kube_inventory]]
+      # url = "https://$HOSTIP:10250"
+      url = "https://192.168.8.100:6443"
+      bearer_token = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+      insecure_skip_verify = true
+---
+# Section: Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegraf
+  namespace: monitoring
+  labels:
+    k8s-app: telegraf
+spec:
+  selector:
+    matchLabels:
+      name: telegraf
+  template:
+    metadata:
+      labels:
+        name: telegraf
+        app: telegraf
+    spec:
+      serviceAccountName: telegraf
+      containers:
+      - name: telegraf
+        image: telegraf:1.16
+        resources:
+          limits:
+            memory: 500Mi
+          requests:
+            cpu: 500m
+            memory: 500Mi
+        env:
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: HOSTIP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: ENV
+          valueFrom:
+            secretKeyRef:
+              name: telegraf
+              key: env
+        - name: MONITOR_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: telegraf
+              key: monitor_username
+        - name: MONITOR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: telegraf
+              key: monitor_password
+        - name: MONITOR_HOST
+          valueFrom:
+            secretKeyRef:
+              name: telegraf
+              key: monitor_host
+        - name: MONITOR_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: telegraf
+              key: monitor_database
+        volumeMounts:
+        - name: config
+          mountPath: /etc/telegraf
+        # ports:
+        # - containerPort: 1619 
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config
+        configMap:
+          name: telegraf-depl
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: telegraf
+#   namespace: monitoring
+#   labels:
+#     app: telegraf
+# spec:
+#   selector:
+#     app: telegraf
+#   ports:
+#     - protocol: TCP
+#       port: 80
+#       name: webhook
+#       targetPort: 1619
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   annotations:
+#     cert-manager.io/cluster-issuer: letsencrypt-prod
+#     kubernetes.io/ingress.class: nginx
+#     kubernetes.io/tls-acme: "true"
+#   labels:
+#     app: telegraf
+#   name: telegraf
+#   namespace: monitoring
+# spec:
+#   rules:
+#   - host: webhook2.pmcd.io
+#     http:
+#       paths:
+#       - backend:
+#           serviceName: telegraf
+#           servicePort: webhook
+#         path: /
+#         pathType: ImplementationSpecific
+#   tls:
+#   - hosts:
+#     - webhook2.pmcd.io
+#     secretName: telegraf-webhook-prod-tls

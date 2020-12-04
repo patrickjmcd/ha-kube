@@ -29,6 +29,10 @@ dependencies:
       version: 4.8.4
       repository: https://helm.influxdata.com/
 
+    # - name: telegraf
+    #   version: 1.7.31
+    #   repository: https://helm.influxdata.com/
+
     - name: ghost
       version: 0.2.2
       repository: "https://patrickjmcd.github.io/helm-charts"
@@ -37,13 +41,17 @@ dependencies:
       version: 0.2.2
       repository: "https://patrickjmcd.github.io/helm-charts"
 
+    - name: particlewebhook
+      version: 0.2.3
+      repository: "https://patrickjmcd.github.io/helm-charts"
+
     - name: postgresql
       version: 9.8.4
       repository: "https://charts.bitnami.com/bitnami"
 
-    # - name: metabase
-    #   version: 0.12.1
-    #   repository: https://kubernetes-charts.storage.googleapis.com/
+    - name: metabase
+      version: 0.12.1
+      repository: https://kubernetes-charts.storage.googleapis.com/
 
     # - name: strapi
     #   version: 0.2.3

@@ -111,11 +111,6 @@
     - helm
     - helm-drone
 
-- include: helm_monitoring.yml
-  tags:
-    - helm
-    - helm-monitoring
-
 # - name: Add hashicorp repository
 #   community.kubernetes.helm_repository:
 #     name: hashicorp
@@ -161,6 +156,16 @@
     name: fantasyfootball
     release_namespace: fantasyfootball
     values: "{{ lookup('file', 'files/values/fantasyfootball.values.yml') | from_yaml }}"
+
+- name: Install monitoring helm chart
+  tags:
+    - helm-monitoring
+  ignore_errors: yes # needed to keep going
+  community.kubernetes.helm:
+    chart_ref: "{{ role_path }}/files/charts/monitoring"
+    name: monitoring
+    release_namespace: monitoring
+    values: "{{ lookup('file', 'files/values/monitoring.values.yml') | from_yaml }}"    
 
 - name: apply cronjobs
   k8s:
