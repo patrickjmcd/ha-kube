@@ -97,7 +97,7 @@
     state: present
     src: "{{ item }}"
   with_fileglob:
-    - "files/storage/*.yml"
+    - "files/storage/*.yaml"
   tags:
     - storage
 
