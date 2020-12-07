@@ -106,11 +106,6 @@
     - helm
     - helm-kube-system
 
-- include: helm_drone.yml
-  tags:
-    - helm
-    - helm-drone
-
 # - name: Add hashicorp repository
 #   community.kubernetes.helm_repository:
 #     name: hashicorp
