@@ -78,88 +78,83 @@ resource "helm_release" "helm-oauth2_proxy" {
     repository = "https://charts.helm.sh/stable"
     chart = "oauth2-proxy"
     namespace = "kube-system"
-
     values = [
             file("../../roles/k3s_deploy/files/values/oauth2-proxy.values.yml")
     ]
 }
 
-resource "null_resource" "helm_update-media" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "cd ../../roles/k3s_deploy/files/charts/media && helm dep update"
-  }
-}
-
-resource "helm_release" "helm-media" {
-    depends_on = [kubectl_manifest.apply_certmanager_resources, null_resource.helm_update-media]
-    name  = "media"
-    chart = "../../roles/k3s_deploy/files/charts/media"
-    namespace = "media"
-}
-
-resource "null_resource" "helm_update-default" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "cd ../../roles/k3s_deploy/files/charts/default && helm dep update"
-  }
-}
-
 resource "helm_release" "helm-default" {
-    depends_on = [kubectl_manifest.apply_certmanager_resources, null_resource.helm_update-default]
+    depends_on = [kubectl_manifest.apply_certmanager_resources, helm_release.helm-docker_registry]
     name  = "default"
     chart = "../../roles/k3s_deploy/files/charts/default"
     namespace = "default"
-}
-
-resource "null_resource" "helm_update-fantasyfootball" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "cd ../../roles/k3s_deploy/files/charts/fantasyfootball && helm dep update"
-  }
+    timeout = 600
+    dependency_update = true
 }
 
 resource "helm_release" "helm-fantasyfootball" {
-    depends_on = [kubectl_manifest.apply_certmanager_resources, null_resource.helm_update-fantasyfootball]
+    depends_on = [kubectl_manifest.apply_certmanager_resources, helm_release.helm-docker_registry, helm_release.helm-default]
     name  = "fantasyfootball"
     chart = "../../roles/k3s_deploy/files/charts/fantasyfootball"
     namespace = "fantasyfootball"
-}
-
-resource "null_resource" "helm_update-monitoring" {
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "cd ../../roles/k3s_deploy/files/charts/monitoring && helm dep update"
-  }
+    timeout = 600
+    dependency_update = true
 }
 
 resource "helm_release" "helm-monitoring" {
-    depends_on = [kubectl_manifest.apply_certmanager_resources, null_resource.helm_update-monitoring]
+    depends_on = [kubectl_manifest.apply_certmanager_resources]
     name  = "monitoring"
     chart = "../../roles/k3s_deploy/files/charts/monitoring"
     namespace = "monitoring"
+    wait = false
+    timeout = 600
+    dependency_update = true
 }
 
-// data "kubectl_filename_list" "list_cronjobs" {
-//     depends_on = [kubectl_manifest.apply_certmanager_resources]
-//     pattern = "../../roles/k3s_deploy/files/cronjobs/*.yml"
-// }
+resource "helm_release" "helm-media" {
+    depends_on = [kubectl_manifest.apply_certmanager_resources, helm_release.helm-oauth2_proxy]
+    name  = "media"
+    chart = "../../roles/k3s_deploy/files/charts/media"
+    namespace = "media"
+    timeout = 600
+    dependency_update = true
+}
+
+data "kubectl_filename_list" "list_cronjobs" {
+    depends_on = [kubectl_manifest.apply_certmanager_resources, helm_release.helm-docker_registry]
+    pattern = "../../roles/k3s_deploy/files/cronjobs/*.yml"
+}
 
 // resource "kubectl_manifest" "apply_cronjobs" {
 //     count     = length(data.kubectl_filename_list.list_cronjobs.matches)
 //     yaml_body = file(element(data.kubectl_filename_list.list_cronjobs.matches, count.index))
 // }
 
+
+data "kubectl_file_documents" "list_telegraf_config" {
+    content = file("../../roles/k3s_deploy/files/telegraf/telegraf.yaml")
+}
+
+resource "kubectl_manifest" "apply_telegraf_config" {
+    count     = length(data.kubectl_file_documents.list_telegraf_config.documents)
+    yaml_body = element(data.kubectl_file_documents.list_telegraf_config.documents, count.index)
+}
+
+data "kubectl_file_documents" "list_telegraf_deployment" {
+    content = file("../../roles/k3s_deploy/files/telegraf/telegraf.deployment.yaml")
+}
+
+resource "kubectl_manifest" "telegraf_deployment" {
+    count     = length(data.kubectl_file_documents.list_telegraf_deployment.documents)
+    yaml_body = element(data.kubectl_file_documents.list_telegraf_deployment.documents, count.index)
+}
+
+data "kubectl_file_documents" "list_telegraf_daemonset" {
+    content = file("../../roles/k3s_deploy/files/telegraf/telegraf.daemonset.yaml")
+}
+
+resource "kubectl_manifest" "telegraf_daemonset" {
+    count     = length(data.kubectl_file_documents.list_telegraf_daemonset.documents)
+    yaml_body = element(data.kubectl_file_documents.list_telegraf_daemonset.documents, count.index)
+}
 

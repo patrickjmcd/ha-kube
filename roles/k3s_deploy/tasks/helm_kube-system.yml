@@ -3,7 +3,7 @@
   community.kubernetes.helm_repository:
     name: stable
     state: present
-    repo_url: https://kubernetes-charts.storage.googleapis.com/
+    repo_url: https://charts.helm.sh/stable
 
 - name: Add jetstack repository
   community.kubernetes.helm_repository:

@@ -1,600 +1,601 @@
 homebridge:
-  replicaCount: 1
+    replicaCount: 1
 
-  image:
-    repository: oznu/homebridge
-    tag: latest
-    pullPolicy: IfNotPresent
+    image:
+        repository: oznu/homebridge
+        tag: latest
+        pullPolicy: IfNotPresent
 
-  config_ui_port: 8888
-  loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
+    config_ui_port: 8888
+    loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
 
-  env:
-    - name: UID
-      value: "1026"
-    - name: GID
-      value: "100"
-    - name: tz
-      value: America/Chicago
+    env:
+        - name: UID
+          value: "1026"
+        - name: GID
+          value: "100"
+        - name: tz
+          value: America/Chicago
 
-  service:
-    type: ClusterIP
-    port: 80
+    service:
+        type: ClusterIP
+        port: 80
 
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-    path: /
-    hosts:
-      - homebridge.pmcd.io
-    tls:
-      - secretName: homebridge-prod-tls
+    ingress:
+        enabled: true
+        annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: "letsencrypt-prod"
+            nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+        path: /
         hosts:
-          - homebridge.pmcd.io
+            - homebridge.pmcd.io
+        tls:
+            - secretName: homebridge-prod-tls
+              hosts:
+                  - homebridge.pmcd.io
 
-  volumes:
-    - name: homebridge
-      persistentVolumeClaim:
-        claimName: nfs-config-homebridge-claim
+    volumes:
+        - name: homebridge
+          persistentVolumeClaim:
+              claimName: nfs-config-homebridge-claim
 
-  volumeMounts:
-    - name: homebridge
-      mountPath: "/homebridge"
+    volumeMounts:
+        - name: homebridge
+          mountPath: "/homebridge"
 
-  resources:
-    requests:
-      memory: 2048Mi
-      cpu: 1
-    limits:
-      memory: 4096Mi
-      cpu: 5
+    resources:
+        requests:
+            memory: 2048Mi
+            cpu: 1
+        limits:
+            memory: 4096Mi
+            cpu: 5
 
-  nodeSelector: {}
+    nodeSelector: {}
 
-  tolerations: []
+    tolerations: []
 
-  affinity: {}
-  annotations:
-    "consul.hashicorp.com/connect-inject": "true"
+    affinity: {}
+    annotations:
+        {}
+        # "consul.hashicorp.com/connect-inject": "true"
 
 ghost:
-  replicaCount: 1
+    replicaCount: 1
 
-  image:
-    repository: ghost
-    tag: latest
-    pullPolicy: IfNotPresent
+    image:
+        repository: ghost
+        tag: latest
+        pullPolicy: IfNotPresent
 
-  service:
-    type: ClusterIP
-    port: 80
+    service:
+        type: ClusterIP
+        port: 80
 
-  uid: 1026
-  gid: 100
+    uid: 1026
+    gid: 100
 
-  env:
-    - name: url
-      value: https://stabletakes.com
+    env:
+        - name: url
+          value: https://stabletakes.com
 
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    ingress:
+        enabled: true
+        annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
-    path: /
-    hosts:
-      - stabletakes.com
-    tls:
-      - secretName: "ghost-st-prod-tls"
+        path: /
         hosts:
-          - stabletakes.com
+            - stabletakes.com
+        tls:
+            - secretName: "ghost-st-prod-tls"
+              hosts:
+                  - stabletakes.com
 
-  volumes:
-    - name: content
-      persistentVolumeClaim:
-        claimName: nfs-config-ghost-claim
+    volumes:
+        - name: content
+          persistentVolumeClaim:
+              claimName: nfs-config-ghost-claim
 
-  volumeMounts:
-    - name: content
-      mountPath: /var/lib/ghost/content
+    volumeMounts:
+        - name: content
+          mountPath: /var/lib/ghost/content
 
-  resources:
-    requests:
-      memory: 128Mi
-      cpu: 0.1
-    limits:
-      memory: 256Mi
-      cpu: 0.5
+    resources:
+        requests:
+            memory: 128Mi
+            cpu: 0.1
+        limits:
+            memory: 256Mi
+            cpu: 0.5
 
-  nodeSelector: {}
+    nodeSelector: {}
 
-  tolerations: []
+    tolerations: []
 
-  affinity: {}
-  # annotations:
-  #   "consul.hashicorp.com/connect-inject": "true"
+    affinity: {}
+    # annotations:
+    #   "consul.hashicorp.com/connect-inject": "true"
 
 influxdb:
-  ## influxdb image version
-  ## ref: https://hub.docker.com/r/library/influxdb/tags/
-  image:
-    repository: "influxdb"
-    tag: "1.8"
-    pullPolicy: IfNotPresent
+    ## influxdb image version
+    ## ref: https://hub.docker.com/r/library/influxdb/tags/
+    image:
+        repository: "influxdb"
+        tag: "1.8"
+        pullPolicy: IfNotPresent
 
-  serviceAccount:
-    create: true
-    name:
-    annotations: {}
+    serviceAccount:
+        create: true
+        name:
+        annotations: {}
 
-  ## Persist data to a persistent volume
-  ##
-  persistence:
-    enabled: true
-    existingClaim: nfs-data-influxdb-claim
+    ## Persist data to a persistent volume
+    ##
+    persistence:
+        enabled: true
+        existingClaim: nfs-data-influxdb-claim
 
-  setDefaultUser:
-    user:
-      existingSecret: influxdb-auth
+    setDefaultUser:
+        user:
+            existingSecret: influxdb-auth
 
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 0.1
-    limits:
-      memory: 1Gi
-      cpu: 1
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    resources:
+        requests:
+            memory: 256Mi
+            cpu: 0.1
+        limits:
+            memory: 1Gi
+            cpu: 1
 
-  # Annotations to be added to InfluxDB pods
-  # podAnnotations:
-  #   "consul.hashicorp.com/connect-inject": "true"
+    # Annotations to be added to InfluxDB pods
+    # podAnnotations:
+    #   "consul.hashicorp.com/connect-inject": "true"
 
-  ingress:
-    enabled: true
-    tls: true
-    secretName: influxdb-prod-tls
-    hostname: influxdb.pmcd.io
-    annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-    path: /
+    ingress:
+        enabled: true
+        tls: true
+        secretName: influxdb-prod-tls
+        hostname: influxdb.pmcd.io
+        annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: "letsencrypt-prod"
+            nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+        path: /
 
 postgresql:
-  ## Bitnami PostgreSQL image version
-  ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
-  ##
-  image:
-    registry: docker.io
-    repository: bitnami/postgresql
-    tag: 11.9.0-debian-10-r48
-    pullPolicy: IfNotPresent
-    debug: false
-
-  service:
-    type: LoadBalancer
-    port: 5432
-    annotations: {}
-    loadBalancerIP: 192.168.8.203
-
-  postgresqlUsername: postgres
-  ## PostgreSQL password using existing secret
-  existingSecret: postgresql-secret
-
-  ## PostgreSQL data dir
-  ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
-  ##
-  postgresqlDataDir: /bitnami/postgresql/data
-
-  postgresqlDatabase: main
-
-  ## PostgreSQL data Persistent Volume Storage Class
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
-  ##   GKE, AWS & OpenStack)
-  ##
-  securityContext:
-    enabled: true
-    fsGroup: 100
-
-  containerSecurityContext:
-    enabled: true
-    runAsUser: 1026
-  volumePermissions:
-    enabled: true
-  persistence:
-    enabled: true
-    ## A manually managed Persistent Volume and Claim
-    ## If defined, PVC must be created manually before volume will be bound
-    ## The value is evaluated as a template, so, for example, the name can depend on .Release or .Chart
+    ## Bitnami PostgreSQL image version
+    ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
     ##
-    existingClaim: nfs-data-postgresql-claim
+    image:
+        registry: docker.io
+        repository: bitnami/postgresql
+        tag: 11.9.0-debian-10-r48
+        pullPolicy: IfNotPresent
+        debug: false
 
-    ## The path the volume will be mounted at, useful when using different
-    ## PostgreSQL images.
+    service:
+        type: LoadBalancer
+        port: 5432
+        annotations: {}
+        loadBalancerIP: 192.168.8.203
+
+    postgresqlUsername: postgres
+    ## PostgreSQL password using existing secret
+    existingSecret: postgresql-secret
+
+    ## PostgreSQL data dir
+    ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
     ##
-    mountPath: /bitnami/postgresql
+    postgresqlDataDir: /bitnami/postgresql/data
 
-  ## updateStrategy for PostgreSQL StatefulSet and its slaves StatefulSets
-  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
-  ##
-  updateStrategy:
-    type: RollingUpdate
+    postgresqlDatabase: main
 
-  ##
-  ## PostgreSQL Master parameters
-  ##
-  master:
-    ## Node, affinity, tolerations, and priorityclass settings for pod assignment
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
-    ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption
+    ## PostgreSQL data Persistent Volume Storage Class
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
     ##
-    nodeSelector:
-      beta.kubernetes.io/arch: amd64
+    securityContext:
+        enabled: true
+        fsGroup: 100
 
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  ##
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
+    containerSecurityContext:
+        enabled: true
+        runAsUser: 1026
+    volumePermissions:
+        enabled: true
+    persistence:
+        enabled: true
+        ## A manually managed Persistent Volume and Claim
+        ## If defined, PVC must be created manually before volume will be bound
+        ## The value is evaluated as a template, so, for example, the name can depend on .Release or .Chart
+        ##
+        existingClaim: nfs-data-postgresql-claim
+
+        ## The path the volume will be mounted at, useful when using different
+        ## PostgreSQL images.
+        ##
+        mountPath: /bitnami/postgresql
+
+    ## updateStrategy for PostgreSQL StatefulSet and its slaves StatefulSets
+    ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+    ##
+    updateStrategy:
+        type: RollingUpdate
+
+    ##
+    ## PostgreSQL Master parameters
+    ##
+    master:
+        ## Node, affinity, tolerations, and priorityclass settings for pod assignment
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+        ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+        ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption
+        ##
+        nodeSelector:
+            beta.kubernetes.io/arch: amd64
+
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    ##
+    resources:
+        requests:
+            memory: 256Mi
+            cpu: 250m
 
 telegraf:
-  ## Default values.yaml for Telegraf
-  ## This is a YAML-formatted file.
-  ## ref: https://hub.docker.com/r/library/telegraf/tags/
+    ## Default values.yaml for Telegraf
+    ## This is a YAML-formatted file.
+    ## ref: https://hub.docker.com/r/library/telegraf/tags/
 
-  replicaCount: 1
+    replicaCount: 1
 
-  image:
-    repo: "telegraf"
-    tag: "1.16"
-    pullPolicy: IfNotPresent
+    image:
+        repo: "telegraf"
+        tag: "1.16"
+        pullPolicy: IfNotPresent
 
-  podAnnotations: {}
+    podAnnotations: {}
 
-  podLabels: {}
+    podLabels: {}
 
-  imagePullSecrets: []
+    imagePullSecrets: []
 
-  ## Configure args passed to Telegraf containers
-  args: []
+    ## Configure args passed to Telegraf containers
+    args: []
 
-  env:
-    - name: HOSTNAME
-      value: "telegraf-polling-service"
+    env:
+        - name: HOSTNAME
+          value: "telegraf-polling-service"
 
-  # An older "volumeMounts" key was previously added which will likely
-  # NOT WORK as you expect. Please use this newer configuration.
+    # An older "volumeMounts" key was previously added which will likely
+    # NOT WORK as you expect. Please use this newer configuration.
 
-  # volumes:
-  # - name: telegraf-output-influxdb2
-  #   configMap:
-  #     name: "telegraf-output-influxdb2"
-  # mountPoints:
-  # - name: telegraf-output-influxdb2
-  #   mountPath: /etc/telegraf/conf.d
-  #   subPath: influxdb2.conf
+    # volumes:
+    # - name: telegraf-output-influxdb2
+    #   configMap:
+    #     name: "telegraf-output-influxdb2"
+    # mountPoints:
+    # - name: telegraf-output-influxdb2
+    #   mountPath: /etc/telegraf/conf.d
+    #   subPath: influxdb2.conf
 
+    ## Configure resource requests and limits
+    ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+    resources:
+        {}
+        # requests:
+        #   memory: 128Mi
+        #   cpu: 100m
+        # limits:
+        #   memory: 128Mi
+        #   cpu: 100m
 
-  ## Configure resource requests and limits
-  ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
-  resources: {}
-    # requests:
-    #   memory: 128Mi
-    #   cpu: 100m
-    # limits:
-    #   memory: 128Mi
-    #   cpu: 100m
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+    nodeSelector: {}
 
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  nodeSelector: {}
+    ## Affinity for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}
 
-  ## Affinity for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
-  affinity: {}
+    ## Tolerations for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
 
-  ## Tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
-  # - key: "key"
-  #   operator: "Equal|Exists"
-  #   value: "value"
-  #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+    service:
+        enabled: true
+        type: ClusterIP
+        annotations: {}
 
-  service:
-    enabled: true
-    type: ClusterIP
-    annotations: {}
+    rbac:
+        # Specifies whether RBAC resources should be created
+        create: true
+        # Create only for the release namespace or cluster wide (Role vs ClusterRole)
+        clusterWide: false
+        # Rules for the created rule
+        rules: []
+    # When using the prometheus input to scrape all pods you need extra rules set to the ClusterRole to be
+    # able to scan the pods for scraping labels. The following rules have been taken from:
+    # https://github.com/helm/charts/blob/master/stable/prometheus/templates/server-clusterrole.yaml#L8-L46
+    #    - apiGroups:
+    #        - ""
+    #      resources:
+    #        - nodes
+    #        - nodes/proxy
+    #        - nodes/metrics
+    #        - services
+    #        - endpoints
+    #        - pods
+    #        - ingresses
+    #        - configmaps
+    #      verbs:
+    #        - get
+    #        - list
+    #        - watch
+    #    - apiGroups:
+    #        - "extensions"
+    #      resources:
+    #        - ingresses/status
+    #        - ingresses
+    #      verbs:
+    #        - get
+    #        - list
+    #        - watch
+    #    - nonResourceURLs:
+    #        - "/metrics"
+    #      verbs:
+    #        - get
 
-  rbac:
-    # Specifies whether RBAC resources should be created
-    create: true
-    # Create only for the release namespace or cluster wide (Role vs ClusterRole)
-    clusterWide: false
-    # Rules for the created rule
-    rules: []
-  # When using the prometheus input to scrape all pods you need extra rules set to the ClusterRole to be
-  # able to scan the pods for scraping labels. The following rules have been taken from:
-  # https://github.com/helm/charts/blob/master/stable/prometheus/templates/server-clusterrole.yaml#L8-L46
-  #    - apiGroups:
-  #        - ""
-  #      resources:
-  #        - nodes
-  #        - nodes/proxy
-  #        - nodes/metrics
-  #        - services
-  #        - endpoints
-  #        - pods
-  #        - ingresses
-  #        - configmaps
-  #      verbs:
-  #        - get
-  #        - list
-  #        - watch
-  #    - apiGroups:
-  #        - "extensions"
-  #      resources:
-  #        - ingresses/status
-  #        - ingresses
-  #      verbs:
-  #        - get
-  #        - list
-  #        - watch
-  #    - nonResourceURLs:
-  #        - "/metrics"
-  #      verbs:
-  #        - get
+    serviceAccount:
+        # Specifies whether a ServiceAccount should be created
+        create: true
+        # The name of the ServiceAccount to use.
+        # If not set and create is true, a name is generated using the fullname template
+        name:
+        # Annotations for the ServiceAccount
+        annotations: {}
 
-  serviceAccount:
-    # Specifies whether a ServiceAccount should be created
-    create: true
-    # The name of the ServiceAccount to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name:
-    # Annotations for the ServiceAccount
-    annotations: {}
+    ## Exposed telegraf configuration
+    ## For full list of possible values see `/docs/all-config-values.yaml` and `/docs/all-config-values.toml`
+    ## ref: https://docs.influxdata.com/telegraf/v1.1/administration/configuration/
+    config:
+        agent:
+            interval: "10s"
+            round_interval: true
+            metric_batch_size: 1000
+            metric_buffer_limit: 10000
+            collection_jitter: "0s"
+            flush_interval: "10s"
+            flush_jitter: "0s"
+            precision: ""
+            debug: false
+            quiet: false
+            logfile: ""
+            hostname: "$HOSTNAME"
+            omit_hostname: false
+        processors:
+            - enum:
+                  mapping:
+                      field: "status"
+                      dest: "status_code"
+                      value_mappings:
+                          healthy: 1
+                          problem: 2
+                          critical: 3
+        outputs:
+            - influxdb:
+                  urls:
+                      - "http://influxdb.default.svc:8086"
+                  database: "telegraf"
+        inputs:
+            - statsd:
+                  service_address: ":8125"
+                  percentiles:
+                      - 50
+                      - 95
+                      - 99
+                  metric_separator: "_"
+                  allowed_pending_messages: 10000
+                  percentile_limit: 1000
 
-  ## Exposed telegraf configuration
-  ## For full list of possible values see `/docs/all-config-values.yaml` and `/docs/all-config-values.toml`
-  ## ref: https://docs.influxdata.com/telegraf/v1.1/administration/configuration/
-  config:
-    agent:
-      interval: "10s"
-      round_interval: true
-      metric_batch_size: 1000
-      metric_buffer_limit: 10000
-      collection_jitter: "0s"
-      flush_interval: "10s"
-      flush_jitter: "0s"
-      precision: ""
-      debug: false
-      quiet: false
-      logfile: ""
-      hostname: "$HOSTNAME"
-      omit_hostname: false
-    processors:
-      - enum:
-          mapping:
-            field: "status"
-            dest: "status_code"
-            value_mappings:
-              healthy: 1
-              problem: 2
-              critical: 3
-    outputs:
-      - influxdb:
-          urls:
-            - "http://influxdb.default.svc:8086"
-          database: "telegraf"
-    inputs:
-      - statsd:
-          service_address: ":8125"
-          percentiles:
-            - 50
-            - 95
-            - 99
-          metric_separator: "_"
-          allowed_pending_messages: 10000
-          percentile_limit: 1000
-
-  # Lifecycle hooks
-  # hooks:
-  #   postStart: ["/bin/sh", "-c", "echo Telegraf started"]
-  #   preStop: ["/bin/sh", "-c", "sleep 60"]
+    # Lifecycle hooks
+    # hooks:
+    #   postStart: ["/bin/sh", "-c", "echo Telegraf started"]
+    #   preStop: ["/bin/sh", "-c", "sleep 60"]
 particlewebhook:
-  replicaCount: 1
+    replicaCount: 1
 
-  image:
-      repository: patrickjmcd/influxdb_webhook # the image of the web server you'd like to run
-      tag: latest
-      pullPolicy: Always
+    image:
+        repository: patrickjmcd/influxdb_webhook # the image of the web server you'd like to run
+        tag: latest
+        pullPolicy: Always
 
-  service:
-      type: ClusterIP
-      port: 80
+    service:
+        type: ClusterIP
+        port: 80
 
-  # secret with keys influx-server, influx-user, influx-password
-  influxDbSecretName: influxdb-auth
+    # secret with keys influx-server, influx-user, influx-password
+    influxDbSecretName: influxdb-auth
 
-  ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress.class: nginx
-        cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
-        nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-      path: /
-      hosts:
-        - webhook.pmcd.io
-      tls:
-        - secretName: "webhook-prod-tls"
-          hosts:
+    ingress:
+        enabled: true
+        annotations:
+            kubernetes.io/ingress.class: nginx
+            cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+            nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+        path: /
+        hosts:
             - webhook.pmcd.io
+        tls:
+            - secretName: "webhook-prod-tls"
+              hosts:
+                  - webhook.pmcd.io
 
-  resources:
-      requests:
-          memory: 128Mi
-          cpu: 0.1
-      limits:
-          memory: 256Mi
-          cpu: 0.5
+    resources:
+        requests:
+            memory: 128Mi
+            cpu: 0.1
+        limits:
+            memory: 256Mi
+            cpu: 0.5
 
-  nodeSelector: {}
+    nodeSelector: {}
 
-  tolerations: []
+    tolerations: []
 
-  affinity: {}
+    affinity: {}
 
 metabase:
-  # Currently Metabase is not horizontly scalable. See
-  # https://github.com/metabase/metabase/issues/1446 and
-  # https://github.com/metabase/metabase/issues/2754
-  # NOTE: Should remain 1
-  replicaCount: 1
-  podAnnotations: {}
-  podLabels: {}
-  image:
-    repository: metabase/metabase
-    tag: v0.35.4
-    pullPolicy: IfNotPresent
+    # Currently Metabase is not horizontly scalable. See
+    # https://github.com/metabase/metabase/issues/1446 and
+    # https://github.com/metabase/metabase/issues/2754
+    # NOTE: Should remain 1
+    replicaCount: 1
+    podAnnotations: {}
+    podLabels: {}
+    image:
+        repository: metabase/metabase
+        tag: v0.35.4
+        pullPolicy: IfNotPresent
 
-  ## String to fully override metabase.fullname template
-  ##
-  # fullnameOverride:
+    ## String to fully override metabase.fullname template
+    ##
+    # fullnameOverride:
 
-  # Config Jetty web server
-  listen:
-    host: "0.0.0.0"
-    port: 3000
-  ssl:
-    # If you have an ssl certificate and would prefer to have Metabase run over HTTPS
-    enabled: false
-    # port: 8443
-    # keyStore: |-
-    #   << JKS KEY STORE >>
-    # keyStorePassword: storepass
-  jetty:
-  #  maxThreads: 254
-  #  minThreads: 8
-  #  maxQueued: -1
-  #  maxIdleTime: 60000
+    # Config Jetty web server
+    listen:
+        host: "0.0.0.0"
+        port: 3000
+    ssl:
+        # If you have an ssl certificate and would prefer to have Metabase run over HTTPS
+        enabled: false
+        # port: 8443
+        # keyStore: |-
+        #   << JKS KEY STORE >>
+        # keyStorePassword: storepass
+    jetty:
+    #  maxThreads: 254
+    #  minThreads: 8
+    #  maxQueued: -1
+    #  maxIdleTime: 60000
 
-  # Backend database
-  database:
-    # Database type (h2 / mysql / postgres), default: h2
-    type: postgres
-    # encryptionKey: << YOUR ENCRYPTION KEY >>
-    ## Only need when you use mysql / postgres
-    # host:
-    # port:
-    # dbname:
-    # username:
-    # password:
-    ## Alternatively, use a connection URI for full configurability. Example for SSL enabled Postgres.
-    # connectionURI: postgres://user:password@host:port/database?ssl=true&sslmode=require&sslfactory=org.postgresql.ssl.NonValidatingFactory"
-    ## If a secret with the database credentials already exists, use the following values:
-    existingSecret: metabase-secret
-    # existingSecretUsernameKey:
-    # existingSecretPasswordKey:
-    existingSecretConnectionURIKey: metabase-uri
+    # Backend database
+    database:
+        # Database type (h2 / mysql / postgres), default: h2
+        type: postgres
+        # encryptionKey: << YOUR ENCRYPTION KEY >>
+        ## Only need when you use mysql / postgres
+        # host:
+        # port:
+        # dbname:
+        # username:
+        # password:
+        ## Alternatively, use a connection URI for full configurability. Example for SSL enabled Postgres.
+        # connectionURI: postgres://user:password@host:port/database?ssl=true&sslmode=require&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+        ## If a secret with the database credentials already exists, use the following values:
+        existingSecret: metabase-secret
+        # existingSecretUsernameKey:
+        # existingSecretPasswordKey:
+        existingSecretConnectionURIKey: metabase-uri
 
-  password:
-    # Changing Metabase password complexity:
-    # weak: no character constraints
-    # normal: at least 1 digit (default)
-    # strong: minimum 8 characters w/ 2 lowercase, 2 uppercase, 1 digit, and 1 special character
-    complexity: normal
-    length: 6
+    password:
+        # Changing Metabase password complexity:
+        # weak: no character constraints
+        # normal: at least 1 digit (default)
+        # strong: minimum 8 characters w/ 2 lowercase, 2 uppercase, 1 digit, and 1 special character
+        complexity: normal
+        length: 6
 
-  timeZone: America/Chicago
-  emojiLogging: true
-  # javaOpts:
-  # pluginsDirectory:
+    timeZone: America/Chicago
+    emojiLogging: true
+    # javaOpts:
+    # pluginsDirectory:
 
-  livenessProbe:
-    initialDelaySeconds: 120
-    timeoutSeconds: 30
-    failureThreshold: 6
+    livenessProbe:
+        initialDelaySeconds: 120
+        timeoutSeconds: 30
+        failureThreshold: 6
 
-  readinessProbe:
-    initialDelaySeconds: 30
-    timeoutSeconds: 3
-    periodSeconds: 5
+    readinessProbe:
+        initialDelaySeconds: 30
+        timeoutSeconds: 3
+        periodSeconds: 5
 
-  service:
-    name: metabase
-    type: ClusterIP
-    externalPort: 80
-    internalPort: 3000
-    # Used to fix NodePort when service.type: NodePort.
-    nodePort:
-    annotations:
-      {}
-      # Used to add custom annotations to the Service.
-      # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0"
-  ingress:
-    enabled: true
-    # Used to create Ingress record (should used with service.type: ClusterIP).
-    hosts:
-      - metabase.pmcd.io
-    # The ingress path. Useful to host metabase on a subpath, such as `/metabase`.
-    path: /
-    labels:
-      # Used to add custom labels to the Ingress
-      # Useful if for example you have multiple Ingress controllers and want your Ingress controllers to bind to specific Ingresses
-      # traffic: internal
-    annotations:
-      kubernetes.io/ingress.class: "nginx"
-      cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
-      nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
-    tls:
-      - secretName: "metabase-prod-tls"
+    service:
+        name: metabase
+        type: ClusterIP
+        externalPort: 80
+        internalPort: 3000
+        # Used to fix NodePort when service.type: NodePort.
+        nodePort:
+        annotations:
+            {}
+            # Used to add custom annotations to the Service.
+            # service.beta.kubernetes.io/aws-load-balancer-internal: "0.0.0.0/0"
+    ingress:
+        enabled: true
+        # Used to create Ingress record (should used with service.type: ClusterIP).
         hosts:
-          - metabase.pmcd.io
+            - metabase.pmcd.io
+        # The ingress path. Useful to host metabase on a subpath, such as `/metabase`.
+        path: /
+        labels:
+            # Used to add custom labels to the Ingress
+            # Useful if for example you have multiple Ingress controllers and want your Ingress controllers to bind to specific Ingresses
+            # traffic: internal
+        annotations:
+            kubernetes.io/ingress.class: "nginx"
+            cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+            nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+        tls:
+            - secretName: "metabase-prod-tls"
+              hosts:
+                  - metabase.pmcd.io
 
-  # A custom log4j.properties file can be provided using a multiline YAML string.
-  # See https://github.com/metabase/metabase/blob/master/resources/log4j.properties
-  #
-  # log4jProperties:
+    # A custom log4j.properties file can be provided using a multiline YAML string.
+    # See https://github.com/metabase/metabase/blob/master/resources/log4j.properties
+    #
+    # log4jProperties:
 
-  resources:
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    requests:
-      memory: 128Mi
-      cpu: 0.1
-    limits:
-      memory: 1024Mi
-      cpu: 2.0
+    resources:
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        requests:
+            memory: 128Mi
+            cpu: 0.1
+        limits:
+            memory: 1024Mi
+            cpu: 2.0
 
-  ## Node labels for pod assignment
-  ## ref: https://kubernetes.io/docs/user-guide/node-selection/
-  #
-  nodeSelector:
-    beta.kubernetes.io/arch: amd64
+    ## Node labels for pod assignment
+    ## ref: https://kubernetes.io/docs/user-guide/node-selection/
+    #
+    nodeSelector:
+        beta.kubernetes.io/arch: amd64
 
-  ## Tolerations for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  ##
-  tolerations: []
+    ## Tolerations for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ##
+    tolerations: []
 
-  ## Affinity for pod assignment
-  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  ##
-  affinity: {}
+    ## Affinity for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ##
+    affinity: {}

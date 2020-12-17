@@ -38,7 +38,7 @@ dependencies:
       repository: "https://patrickjmcd.github.io/helm-charts"
 
     - name: homebridge
-      version: 0.2.2
+      version: 0.2.4
       repository: "https://patrickjmcd.github.io/helm-charts"
 
     - name: particlewebhook

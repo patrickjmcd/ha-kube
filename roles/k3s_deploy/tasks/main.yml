@@ -5,24 +5,6 @@
       - openshift
       - pyhelm
 
-# - name: pull secrets
-#   shell: "rsync -aP nas:/volume1/kube-secrets/secrets/ /tmp/secrets/"
-#   tags:
-#     - secrets
-
-# - name: pull postinstall_secrets
-#   shell: "rsync -aP nas:/volume1/kube-secrets/secrets_postinstall/ /tmp/secrets_postinstall/"
-#   tags:
-#     - secrets
-
-- name: create drone namespace
-  k8s:
-    name: drone
-    kind: Namespace
-    state: present
-  tags:
-    - namespaces
-
 - name: create monitoring namespace
   k8s:
     name: monitoring
@@ -69,18 +51,6 @@
     - "{{ role_path }}/files/secrets/*.yaml"
   tags:
     - secrets
-
-
-# - name: grab cert-manager CRDs
-#   get_url:
-#     url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.crds.yaml"
-#     dest: /tmp/cert-manager.crds.yaml
-#     mode: 0777
-
-# - name: install cert-manager crds
-#   k8s:
-#     state: present
-#     src: /tmp/cert-manager.crds.yaml
 
 - name: apply secrets
   k8s:
@@ -134,7 +104,7 @@
     chart_ref: "{{ role_path }}/files/charts/media"
     name: media
     release_namespace: media
-    values: "{{ lookup('file', 'files/values/media.values.yml') | from_yaml }}"
+    values: "{{ lookup('file', 'files/charts/media/values.yaml') | from_yaml }}"
 
 - name: Install default helm chart
   ignore_errors: yes # needed to keep going
@@ -142,7 +112,7 @@
     chart_ref: "{{ role_path }}/files/charts/default"
     name: default
     release_namespace: default
-    values: "{{ lookup('file', 'files/values/default.values.yml') | from_yaml }}"
+    values: "{{ lookup('file', 'files/charts/default/values.yaml') | from_yaml }}"
 
 - name: Install fantasyfootball helm chart
   ignore_errors: yes # needed to keep going
@@ -150,7 +120,7 @@
     chart_ref: "{{ role_path }}/files/charts/fantasyfootball"
     name: fantasyfootball
     release_namespace: fantasyfootball
-    values: "{{ lookup('file', 'files/values/fantasyfootball.values.yml') | from_yaml }}"
+    values: "{{ lookup('file', 'files/charts/fantasyfootball/values.yaml') | from_yaml }}"
 
 - name: Install monitoring helm chart
   tags:
@@ -160,7 +130,15 @@
     chart_ref: "{{ role_path }}/files/charts/monitoring"
     name: monitoring
     release_namespace: monitoring
-    values: "{{ lookup('file', 'files/values/monitoring.values.yml') | from_yaml }}"    
+    values: "{{ lookup('file', 'files/charts/monitoring/values.yaml') | from_yaml }}"    
+
+- name: apply telegraf
+  k8s:
+    state: present
+    src: "{{ item }}"
+  with_fileglob:
+    - "files/telegraf/*.yaml"
+
 
 - name: apply cronjobs
   k8s:

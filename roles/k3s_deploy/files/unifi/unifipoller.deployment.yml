@@ -38,8 +38,22 @@ spec:
                 secretKeyRef:
                   name: unifi-secret
                   key: unifi-default-pass
-            - name: UP_INFLUXDB_DISABLE
-              value: "true"
+            - name: UP_INFLUXDB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: influxdb-server
+            - name: UP_INFLUXDB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: influxdb-user
+            - name: UP_INFLUXDB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-auth
+                  key: influxdb-password
+            
             - name: UP_UNIFI_DEFAULT_SAVE_DPI
               value: "true"
           resources:

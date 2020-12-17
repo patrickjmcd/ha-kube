@@ -3,3 +3,7 @@ drone_secrets.sh
 **/secrets_decrypted/*
 **/secrets_postinstall/*
 *.tgz
+
+.terraform*
+kubeconfig
+*.tfstate

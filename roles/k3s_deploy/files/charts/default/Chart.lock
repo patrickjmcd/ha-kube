@@ -7,7 +7,7 @@ dependencies:
   version: 0.2.2
 - name: homebridge
   repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
+  version: 0.2.4
 - name: particlewebhook
   repository: https://patrickjmcd.github.io/helm-charts
   version: 0.2.3
@@ -17,5 +17,5 @@ dependencies:
 - name: metabase
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 0.12.1
-digest: sha256:41a70f102745d874209774933b574351ec0dc07040abeb86faa48d20e2e2c596
-generated: "2020-12-03T20:28:17.114946-06:00"
+digest: sha256:d2428b81818350a388bdaa5119fa15119dcd7f176ddd33793378f4b2fa49f81e
+generated: "2020-12-14T08:51:03.89617-06:00"

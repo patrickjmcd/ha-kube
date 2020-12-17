@@ -1,6 +1,6 @@
 apiVersion: v2
-name: default
-description: A Helm chart for Kubernetes
+name: monitoring
+description: Monitoring Stack
 chart-dirs:
     - charts
 
@@ -30,9 +30,17 @@ dependencies:
       repository: https://grafana.github.io/loki/charts
 
     - name: chronograf
-      version: 1.1.19
-      repository: "https://patrickjmcd.github.io/helm-charts"
+      version: 1.1.22
+      repository: "https://helm.influxdata.com/"
 
     - name: kapacitor
       version: 1.3.1
       repository: "https://helm.influxdata.com/"
+
+    - name: prometheus
+      version: 12.0.3
+      repository: https://prometheus-community.github.io/helm-charts
+
+    - name: grafana
+      version: 6.1.13
+      repository: https://grafana.github.io/helm-charts
