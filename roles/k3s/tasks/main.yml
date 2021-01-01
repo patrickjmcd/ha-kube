@@ -28,7 +28,10 @@
 - name: Install k3s on server nodes
   shell: curl -sfL https://get.k3s.io | sh -s - server \
     --server "https://{{ groups['k3s_firstnode'] | map('extract', hostvars, ['ansible_host'])| list | first }}:6443" \
-    --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}"
+    --token "{{ hostvars[groups['k3s_firstnode'][0]]['tkn']['stdout'] }}" \
+    --no-deploy servicelb \
+    --no-deploy traefik \
+    --write-kubeconfig-mode 644
   ignore_errors: True
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"

@@ -5,17 +5,11 @@ dependencies:
 - name: ghost
   repository: https://patrickjmcd.github.io/helm-charts
   version: 0.2.2
-- name: homebridge
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.4
-- name: particlewebhook
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.3
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 9.8.4
-- name: metabase
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 0.12.1
-digest: sha256:d2428b81818350a388bdaa5119fa15119dcd7f176ddd33793378f4b2fa49f81e
-generated: "2020-12-14T08:51:03.89617-06:00"
+- name: commento
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 1.0.0
+digest: sha256:d61f8f4a932a5e87b4dd099930aa49b7310ffc8848f7a520a4436e066ee6cbf9
+generated: "2020-12-23T20:28:04.902877-06:00"

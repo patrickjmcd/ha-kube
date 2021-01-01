@@ -1,0 +1,15 @@
+dependencies:
+- name: homebridge
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.6
+- name: particlewebhook
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.3
+- name: home-assistant
+  repository: https://k8s-at-home.com/charts/
+  version: 5.1.0
+- name: node-red
+  repository: https://k8s-at-home.com/charts/
+  version: 5.2.1
+digest: sha256:a34ebaa1f2599caeb4a7819cab4b5287b6151d8e57bd23fb1b7102de24356554
+generated: "2020-12-20T09:46:47.140531-06:00"

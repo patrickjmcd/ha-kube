@@ -1,33 +1,33 @@
 dependencies:
 - name: lidarr
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
+  repository: https://k8s-at-home.com/charts/
+  version: 6.2.1
 - name: radarr
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
+  repository: https://k8s-at-home.com/charts/
+  version: 8.2.1
 - name: sonarr
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
+  repository: https://k8s-at-home.com/charts/
+  version: 8.1.1
 - name: nzbget
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.3
+  repository: https://k8s-at-home.com/charts/
+  version: 7.2.1
 - name: sabnzbd
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
-- name: nzbhydra
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.4
+  repository: https://k8s-at-home.com/charts/
+  version: 4.1.1
+- name: nzbhydra2
+  repository: https://k8s-at-home.com/charts/
+  version: 5.1.1
 - name: ombi
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
+  repository: https://k8s-at-home.com/charts/
+  version: 6.2.1
 - name: beets
   repository: https://patrickjmcd.github.io/helm-charts
   version: 0.2.2
 - name: jellyfin
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.2
-- name: airsonic
-  repository: https://patrickjmcd.github.io/helm-charts
-  version: 0.2.3
-digest: sha256:74736fb7db0406e959af0dd4f07e3286ebf237dd6f875418f2a55f6d3946e6c4
-generated: "2020-09-20T00:16:31.815684-05:00"
+  repository: https://k8s-at-home.com/charts/
+  version: 4.2.1
+- name: navidrome
+  repository: https://k8s-at-home.com/charts/
+  version: 2.2.1
+digest: sha256:43ee3e7e8e6810175742bbb50b1903ccf5c0932ddee3c1f70e7c5511944d64c4
+generated: "2020-12-21T21:26:19.329555-06:00"

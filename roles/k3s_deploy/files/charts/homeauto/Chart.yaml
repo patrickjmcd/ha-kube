@@ -1,6 +1,6 @@
 apiVersion: v2
-name: default
-description: A Helm chart for Kubernetes
+name: homeauto
+description: A Helm chart for home automation
 chart-dirs:
     - charts
 
@@ -17,7 +17,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.0
+version: 0.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -25,38 +25,18 @@ version: 0.2.0
 appVersion: 1.16.0
 
 dependencies:
-    - name: influxdb
-      version: 4.8.4
-      repository: https://helm.influxdata.com/
-
-    # - name: telegraf
-    #   version: 1.7.31
-    #   repository: https://helm.influxdata.com/
-
-    - name: ghost
-      version: 0.2.2
+    - name: homebridge
+      version: 0.2.6
       repository: "https://patrickjmcd.github.io/helm-charts"
 
-    # - name: homebridge
-    #   version: 0.2.4
-    #   repository: "https://patrickjmcd.github.io/helm-charts"
-
-    # - name: particlewebhook
-    #   version: 0.2.3
-    #   repository: "https://patrickjmcd.github.io/helm-charts"
-
-    - name: postgresql
-      version: 9.8.4
-      repository: "https://charts.bitnami.com/bitnami"
-
-    # - name: metabase
-    #   version: 0.12.1
-    #   repository: https://kubernetes-charts.storage.googleapis.com/
-
-    # - name: strapi
-    #   version: 0.2.3
-    #   repository: "https://patrickjmcd.github.io/helm-charts"
-
-    - name: commento
-      version: 1.0.0
+    - name: particlewebhook
+      version: 0.2.3
       repository: "https://patrickjmcd.github.io/helm-charts"
+
+    - name: home-assistant
+      version: 5.1.0
+      repository: "https://k8s-at-home.com/charts/"
+
+    - name: node-red
+      version: 5.2.1
+      repository: "https://k8s-at-home.com/charts/"

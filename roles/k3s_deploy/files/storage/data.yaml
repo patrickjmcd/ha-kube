@@ -228,3 +228,36 @@ spec:
     selector:
         matchLabels:
             mediatype: data-kapacitor
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nfs-data-nodered
+    labels:
+        mediatype: data-nodered
+spec:
+    capacity:
+        storage: 1Gi # This size is used to match a volume to a tenents claim
+    storageClassName: manual
+    accessModes:
+        - ReadWriteOnce # Access modes are defined below
+    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below
+    nfs:
+        server: 192.168.1.252
+        path: /volume1/data/nodered # Please change this to the relevant share
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nfs-data-nodered-claim
+    namespace: homeauto
+spec:
+    accessModes:
+        - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+    storageClassName: manual
+    resources:
+        requests:
+            storage: 1Gi # volume size requested
+    selector:
+        matchLabels:
+            mediatype: data-nodered
