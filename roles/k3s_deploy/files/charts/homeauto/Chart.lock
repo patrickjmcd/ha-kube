@@ -7,9 +7,12 @@ dependencies:
   version: 0.2.3
 - name: home-assistant
   repository: https://k8s-at-home.com/charts/
-  version: 5.1.0
+  version: 6.0.0
 - name: node-red
   repository: https://k8s-at-home.com/charts/
   version: 5.2.1
-digest: sha256:a34ebaa1f2599caeb4a7819cab4b5287b6151d8e57bd23fb1b7102de24356554
-generated: "2020-12-20T09:46:47.140531-06:00"
+- name: mosquitto
+  repository: https://k8s-at-home.com/charts/
+  version: 0.7.0
+digest: sha256:ee3dbc6320a732d9440bcb3578fee56d85a5cda04a4f95ed4e879f0788375e1b
+generated: "2021-02-16T18:54:38.563153-06:00"
