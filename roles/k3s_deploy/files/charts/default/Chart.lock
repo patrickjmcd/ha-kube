@@ -11,5 +11,8 @@ dependencies:
 - name: commento
   repository: https://patrickjmcd.github.io/helm-charts
   version: 1.0.0
-digest: sha256:d61f8f4a932a5e87b4dd099930aa49b7310ffc8848f7a520a4436e066ee6cbf9
-generated: "2020-12-23T20:28:04.902877-06:00"
+- name: babybuddy
+  repository: https://patrickjmcd.github.io/helm-charts
+  version: 0.2.2
+digest: sha256:9a907dcc3f4929728619a5c89d19c1f9fd8ce065f8581b52b0341f8d54a9a671
+generated: "2021-03-13T14:52:16.820277-06:00"

@@ -4,7 +4,7 @@ dependencies:
   version: 0.40.0
 - name: chronograf
   repository: https://patrickjmcd.github.io/helm-charts
-  version: 1.1.21
+  version: 1.1.19
 - name: kapacitor
   repository: https://helm.influxdata.com/
   version: 1.3.1
@@ -14,5 +14,5 @@ dependencies:
 - name: grafana
   repository: https://grafana.github.io/helm-charts
   version: 6.1.13
-digest: sha256:11bd167ced8441feb4fe1ae744f9736d8238aa4a81c0a7fc5337844496e97c8f
-generated: "2020-12-08T17:35:30.286776-06:00"
+digest: sha256:92725093cd7d093b93c150c2fda25302d4c511df9e272f851c83f24400a4888a
+generated: "2021-02-16T21:42:09.448906-06:00"

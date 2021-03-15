@@ -60,3 +60,7 @@ dependencies:
     - name: commento
       version: 1.0.0
       repository: "https://patrickjmcd.github.io/helm-charts"
+
+    - name: babybuddy
+      version: 0.2.2
+      repository: "https://patrickjmcd.github.io/helm-charts"

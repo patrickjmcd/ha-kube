@@ -4,7 +4,7 @@ homebridge:
     image:
         repository: oznu/homebridge
         tag: latest
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
     config_ui_port: 8888
     loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
@@ -27,6 +27,8 @@ homebridge:
             kubernetes.io/ingress.class: nginx
             cert-manager.io/cluster-issuer: "letsencrypt-prod"
             nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+            nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+            nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
         path: /
         hosts:
             - homebridge.pmcd.io
@@ -237,7 +239,7 @@ mosquitto:
         podMonitor:
             enabled: false
         sidecar:
-            enabled: false
+            enabled: true
             port: 9234
             args:
                 - "--use-splitted-config"
