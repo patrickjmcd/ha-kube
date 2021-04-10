@@ -1,0 +1,42 @@
+repositories:
+- name: patrickjmcd
+  url: https://patrickjmcd.github.io/helm-charts
+- name: influxdata
+  url: https://helm.influxdata.com/
+- name: loki
+  url: https://grafana.github.io/loki/charts
+- name: prometheus-community
+  url: https://prometheus-community.github.io/helm-charts
+- name: grafana
+  url: https://grafana.github.io/helm-charts
+
+releases:
+  - name: loki-stack
+    namespace: monitoring
+    chart: loki/loki-stack
+    values:
+      - values/loki-stack.yaml
+
+  - name: chronograf
+    namespace: monitoring
+    chart: patrickjmcd/chronograf
+    values:
+      - values/chronograf.yaml
+
+  - name: kapacitor
+    namespace: monitoring
+    chart: influxdata/kapacitor
+    values:
+      - values/kapacitor.yaml
+
+  - name: prometheus
+    namespace: monitoring
+    chart: prometheus-community/prometheus
+    values:
+      - values/prometheus.yaml
+
+  - name: grafana
+    namespace: monitoring
+    chart: grafana/grafana
+    values:
+      - values/grafana.yaml

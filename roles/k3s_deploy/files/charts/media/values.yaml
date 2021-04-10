@@ -76,18 +76,18 @@ jellyfin:
             mountPath: /movies
             existingClaim: "nfs-movies-claim"
 
-        movies:
+        tv:
             enabled: true
             emptyDir: false
             mountPath: /tv
             existingClaim: "nfs-tv-claim"
-            
+
         video:
             enabled: true
             emptyDir: false
             mountPath: /video
             existingClaim: "nfs-video-claim"
-        
+
     ingress:
         enabled: true
         annotations:

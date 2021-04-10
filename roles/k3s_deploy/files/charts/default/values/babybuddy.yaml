@@ -1,0 +1,46 @@
+replicaCount: 1
+
+image:
+    repository: babybuddy/babybuddy
+    tag: latest
+    pullPolicy: IfNotPresent
+
+postgresSecretName: babybuddy-secret
+secretKey: this-is-a-secret
+# secretKey should specify a secret with values for keys
+# - postgres-db-host
+# - postgres-db-name
+# - postgres-db-user
+# - postgres-db-password
+timeZone: America/Chicago
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    path: /
+    hosts:
+        - babybuddy.pmcd.io
+    tls:
+        - secretName: babybuddy-prod-tls
+          hosts:
+              - babybuddy.pmcd.io
+
+volumes:
+    - name: babybuddy-config
+      persistentVolumeClaim:
+          claimName: nfs-config-babybuddy-claim
+
+volumeMounts:
+    - name: babybuddy-config
+      mountPath: "/media"
+
+resources:
+    {}
+    # requests:
+    #     memory: 128Mi
+    #     cpu: 0.1
+    # limits:
+    #     memory: 256Mi
+    #     cpu: 0.5

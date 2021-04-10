@@ -1,0 +1,47 @@
+# Default values for node-red.
+image:
+    repository: nodered/node-red
+    pullPolicy: IfNotPresent
+    tag: 1.2.5
+
+strategy:
+    type: Recreate
+
+# See more environment varaibles in the node-red documentation
+# https://nodered.org/docs/getting-started/docker
+env:
+    TZ: America/Chicago
+    # NODE_OPTIONS:
+    # NODE_RED_ENABLE_PROJECTS:
+    # NODE_RED_ENABLE_SAFE_MODE:
+    # FLOWS:
+
+service:
+    port:
+        port: 1880
+
+persistence:
+    data:
+        enabled: false
+        emptyDir: false
+        mountPath: /data
+        existingClaim: nfs-data-nodered-claim
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+        nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+        nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    hosts:
+        - host: nodered.pmcd.io
+          paths:
+              - path: /
+                # Ignored if not kubeVersion >= 1.14-0
+                pathType: Prefix
+    tls:
+        - secretName: nodered-prod-tls
+          hosts:
+              - nodered.pmcd.io

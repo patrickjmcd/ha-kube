@@ -1,0 +1,28 @@
+loki:
+    enabled: true
+    resources:
+        requests:
+            memory: 128Mi
+            cpu: 0.1
+        limits:
+            memory: 512Mi
+            cpu: 1.0
+
+promtail:
+    enabled: true
+    resources:
+        requests:
+            memory: 128Mi
+            cpu: 0.1
+        limits:
+            memory: 512Mi
+            cpu: 1.0
+
+fluent-bit:
+    enabled: false
+
+grafana:
+    enabled: false
+
+prometheus:
+    enabled: false

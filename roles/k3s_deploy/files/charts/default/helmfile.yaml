@@ -1,0 +1,46 @@
+repositories:
+- name: patrickjmcd
+  url: https://patrickjmcd.github.io/helm-charts
+- name: influxdata
+  url: https://helm.influxdata.com/
+- name: bitnami
+  url: https://charts.bitnami.com/bitnami
+- name: stable
+  url: https://charts.helm.sh/stable
+
+releases:
+  - name: influxdb
+    namespace: default
+    chart: influxdata/influxdb
+    values:
+      - values/influxdb.yaml
+
+  - name: ghost
+    namespace: default
+    chart: patrickjmcd/ghost
+    values:
+      - values/ghost.yaml
+
+  - name: postgresql
+    namespace: default
+    chart: bitnami/postgresql
+    values:
+      - values/postgresql.yaml
+
+  - name: commento
+    namespace: default
+    chart: patrickjmcd/commento
+    values:
+      - values/commento.yaml
+
+  - name: babybuddy
+    namespace: default
+    chart: patrickjmcd/babybuddy
+    values:
+      - values/babybuddy.yaml
+
+  # - name: metabase
+  #   namespace: default
+  #   chart: stable/metabase
+  #   values:
+  #     - values/metabase.yaml

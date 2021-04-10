@@ -1,0 +1,82 @@
+## Bitnami PostgreSQL image version
+## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
+##
+image:
+    registry: docker.io
+    repository: bitnami/postgresql
+    tag: 11.9.0-debian-10-r48
+    pullPolicy: IfNotPresent
+    debug: false
+
+service:
+    type: LoadBalancer
+    port: 5432
+    annotations: {}
+    loadBalancerIP: 192.168.8.203
+
+postgresqlUsername: postgres
+## PostgreSQL password using existing secret
+existingSecret: postgresql-secret
+
+## PostgreSQL data dir
+## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md
+##
+postgresqlDataDir: /bitnami/postgresql/data
+
+postgresqlDatabase: main
+
+## PostgreSQL data Persistent Volume Storage Class
+## If defined, storageClassName: <storageClass>
+## If set to "-", storageClassName: "", which disables dynamic provisioning
+## If undefined (the default) or set to null, no storageClassName spec is
+##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+##   GKE, AWS & OpenStack)
+##
+securityContext:
+    enabled: true
+    fsGroup: 100
+
+containerSecurityContext:
+    enabled: true
+    runAsUser: 1026
+volumePermissions:
+    enabled: true
+persistence:
+    enabled: true
+    ## A manually managed Persistent Volume and Claim
+    ## If defined, PVC must be created manually before volume will be bound
+    ## The value is evaluated as a template, so, for example, the name can depend on .Release or .Chart
+    ##
+    existingClaim: nfs-data-postgresql-claim
+
+    ## The path the volume will be mounted at, useful when using different
+    ## PostgreSQL images.
+    ##
+    mountPath: /bitnami/postgresql
+
+## updateStrategy for PostgreSQL StatefulSet and its slaves StatefulSets
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+##
+updateStrategy:
+    type: RollingUpdate
+
+##
+## PostgreSQL Master parameters
+##
+master:
+    ## Node, affinity, tolerations, and priorityclass settings for pod assignment
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+    ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption
+    ##
+    nodeSelector:
+        beta.kubernetes.io/arch: amd64
+
+## Configure resource requests and limits
+## ref: http://kubernetes.io/docs/user-guide/compute-resources/
+##
+resources:
+    requests:
+        memory: 256Mi
+        cpu: 250m

@@ -1,9 +1,9 @@
 ---
-- name: install pip modules
-  pip:
-    name:
-      - openshift
-      - pyhelm
+# - name: install pip modules
+#   pip:
+#     name:
+#       - openshift
+#       - pyhelm
 
 - name: create monitoring namespace
   k8s:
@@ -106,47 +106,50 @@
 #   tags:
 #     - consul
 
-- name: Install media helm chart
-  ignore_errors: yes # needed to keep going
-  community.kubernetes.helm:
-    chart_ref: "{{ role_path }}/files/charts/media"
-    name: media
-    release_namespace: media
-    values: "{{ lookup('file', 'files/charts/media/values.yaml') | from_yaml }}"
+- name: Install helmfile for all charts
+  shell: "helmfile -f {{ role_path }}/files/helmfile.yaml apply"
 
-- name: Install default helm chart
-  ignore_errors: yes # needed to keep going
-  community.kubernetes.helm:
-    chart_ref: "{{ role_path }}/files/charts/default"
-    name: default
-    release_namespace: default
-    values: "{{ lookup('file', 'files/charts/default/values.yaml') | from_yaml }}"
+# - name: Install media helm chart
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: "{{ role_path }}/files/charts/media"
+#     name: media
+#     release_namespace: media
+#     values: "{{ lookup('file', 'files/charts/media/values.yaml') | from_yaml }}"
 
-- name: Install homeauto helm chart
-  ignore_errors: yes # needed to keep going
-  community.kubernetes.helm:
-    chart_ref: "{{ role_path }}/files/charts/homeauto"
-    name: homeauto
-    release_namespace: homeauto
-    values: "{{ lookup('file', 'files/charts/homeauto/values.yaml') | from_yaml }}"
+# - name: Install default helm chart
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: "{{ role_path }}/files/charts/default"
+#     name: default
+#     release_namespace: default
+#     values: "{{ lookup('file', 'files/charts/default/values.yaml') | from_yaml }}"
 
-- name: Install fantasyfootball helm chart
-  ignore_errors: yes # needed to keep going
-  community.kubernetes.helm:
-    chart_ref: "{{ role_path }}/files/charts/fantasyfootball"
-    name: fantasyfootball
-    release_namespace: fantasyfootball
-    values: "{{ lookup('file', 'files/charts/fantasyfootball/values.yaml') | from_yaml }}"
+# - name: Install homeauto helm chart
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: "{{ role_path }}/files/charts/homeauto"
+#     name: homeauto
+#     release_namespace: homeauto
+#     values: "{{ lookup('file', 'files/charts/homeauto/values.yaml') | from_yaml }}"
 
-- name: Install monitoring helm chart
-  tags:
-    - helm-monitoring
-  ignore_errors: yes # needed to keep going
-  community.kubernetes.helm:
-    chart_ref: "{{ role_path }}/files/charts/monitoring"
-    name: monitoring
-    release_namespace: monitoring
-    values: "{{ lookup('file', 'files/charts/monitoring/values.yaml') | from_yaml }}"    
+# - name: Install fantasyfootball helm chart
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: "{{ role_path }}/files/charts/fantasyfootball"
+#     name: fantasyfootball
+#     release_namespace: fantasyfootball
+#     values: "{{ lookup('file', 'files/charts/fantasyfootball/values.yaml') | from_yaml }}"
+
+# - name: Install monitoring helm chart
+#   tags:
+#     - helm-monitoring
+#   ignore_errors: yes # needed to keep going
+#   community.kubernetes.helm:
+#     chart_ref: "{{ role_path }}/files/charts/monitoring"
+#     name: monitoring
+#     release_namespace: monitoring
+#     values: "{{ lookup('file', 'files/charts/monitoring/values.yaml') | from_yaml }}"    
 
 - name: apply telegraf
   k8s:
@@ -163,12 +166,12 @@
   with_fileglob:
     - "files/cronjobs/*.yml"
 
-- name: apply unifi
-  k8s:
-    state: present
-    src: "{{ item }}"
-  with_fileglob:
-    - "files/unifi/*.yml"
+# - name: apply unifi
+#   k8s:
+#     state: present
+#     src: "{{ item }}"
+#   with_fileglob:
+#     - "files/unifi/*.yml"
 
 - name: grab kube-dashboard
   get_url:

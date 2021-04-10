@@ -1,0 +1,56 @@
+replicaCount: 1
+
+image:
+    repository: ghost
+    tag: latest
+    pullPolicy: IfNotPresent
+
+service:
+    type: ClusterIP
+    port: 80
+
+uid: 1026
+gid: 100
+
+env:
+    - name: url
+      value: https://stabletakes.com
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    path: /
+    hosts:
+        - stabletakes.com
+    tls:
+        - secretName: "ghost-st-prod-tls"
+          hosts:
+              - stabletakes.com
+
+volumes:
+    - name: content
+      persistentVolumeClaim:
+          claimName: nfs-config-ghost-claim
+
+volumeMounts:
+    - name: content
+      mountPath: /var/lib/ghost/content
+
+resources:
+    requests:
+        memory: 128Mi
+        cpu: 0.1
+    limits:
+        memory: 256Mi
+        cpu: 0.5
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+# annotations:
+#   "consul.hashicorp.com/connect-inject": "true"

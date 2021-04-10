@@ -1,0 +1,17 @@
+
+repositories:
+- name: patrickjmcd
+  url: https://patrickjmcd.github.io/helm-charts
+
+releases:
+  - name: nginx
+    namespace: fantasyfootball
+    chart: patrickjmcd/nginx
+    values:
+      - values/nginx.yaml
+
+  - name: strapi
+    namespace: fantasyfootball
+    chart: patrickjmcd/strapi
+    values:
+      - values/strapi.yaml

@@ -25,8 +25,8 @@ kube07 ansible_host=192.168.8.107
 ansible_ssh_user=pi
 
 [localhost]
-thispc ansible_host=127.0.0.1 ansible_python_interpreter=/usr/local/bin/python3
+thispc ansible_host=127.0.0.1 ansible_python_interpreter=/usr/bin/python3
 
 [localhost:vars]
-ansible_python_interpreter="/usr/local/bin/python3"
+ansible_python_interpreter="/usr/bin/python3"
 ansible_connection=local

@@ -1,0 +1,36 @@
+repositories:
+- name: patrickjmcd
+  url: https://patrickjmcd.github.io/helm-charts
+- name: k8s-at-home
+  url: https://k8s-at-home.com/charts/
+
+releases:
+  - name: homebridge
+    namespace: homeauto
+    chart: k8s-at-home/homebridge
+    values:
+      - values/homebridge.yaml
+
+  - name: particlewebhook
+    namespace: homeauto
+    chart: patrickjmcd/particlewebhook
+    values:
+      - values/particlewebhook.yaml
+
+  - name: home-assistant
+    namespace: homeauto
+    chart: k8s-at-home/home-assistant
+    values:
+      - values/home-assistant.yaml
+
+  - name: node-red
+    namespace: homeauto
+    chart: k8s-at-home/node-red
+    values:
+      - values/node-red.yaml
+
+  - name: mosquitto
+    namespace: homeauto
+    chart: k8s-at-home/mosquitto
+    values:
+      - values/mosquitto.yaml

@@ -1,0 +1,42 @@
+image:
+    repository: registry.gitlab.com/commento/commento
+    pullPolicy: IfNotPresent
+    tag: latest
+
+strategy:
+    type: Recreate
+
+env:
+    TZ: America/Chicago
+    COMMENTO_ORIGIN: "https://commento.pmcd.io"
+    COMMENTO_PORT: 8080
+
+service:
+    port:
+        port: 8080
+
+envFrom:
+    # should have a COMMENTO_POSTGRES parameter with a value like: postgres://postgres:postgres@db:5432/commento?sslmode=disable
+    - secretRef:
+          name: commento-envs
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+        nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
+        # nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+        # nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    hosts:
+        - host: commento.pmcd.io
+          paths:
+              - path: /
+                pathType: Prefix
+    tls:
+        - secretName: commento-prod-tls
+          hosts:
+              - commento.pmcd.io
+
+nodeSelector:
+    beta.kubernetes.io/arch: amd64

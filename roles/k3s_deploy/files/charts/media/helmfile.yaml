@@ -1,0 +1,67 @@
+
+repositories:
+- name: k8s-at-home
+  url: https://k8s-at-home.com/charts/
+- name: patrickjmcd
+  url: https://patrickjmcd.github.io/helm-charts
+
+releases:
+  - name: lidarr
+    namespace: media
+    chart: k8s-at-home/lidarr
+    values:
+      - values/lidarr.yaml
+
+  - name: radarr
+    namespace: media
+    chart: k8s-at-home/radarr
+    values:
+      - values/radarr.yaml
+
+  - name: sonarr
+    namespace: media
+    chart: k8s-at-home/sonarr
+    values:
+      - values/sonarr.yaml
+  
+  - name: nzbget
+    namespace: media
+    chart: k8s-at-home/nzbget
+    values:
+      - values/nzbget.yaml
+
+  - name: sabnzbd
+    namespace: media
+    chart: k8s-at-home/sabnzbd
+    values:
+      - values/sabnzbd.yaml
+
+  - name: nzbhydra2
+    namespace: media
+    chart: k8s-at-home/nzbhydra2
+    values:
+      - values/nzbhydra2.yaml
+
+  - name: ombi
+    namespace: media
+    chart: k8s-at-home/ombi
+    values:
+      - values/ombi.yaml
+
+  - name: jellyfin
+    namespace: media
+    chart: k8s-at-home/jellyfin
+    values:
+      - values/jellyfin.yaml
+
+  - name: navidrome
+    namespace: media
+    chart: k8s-at-home/navidrome
+    values:
+      - values/navidrome.yaml
+  
+  - name: beets
+    namespace: media
+    chart: patrickjmcd/beets
+    values:
+      - values/beets.yaml
