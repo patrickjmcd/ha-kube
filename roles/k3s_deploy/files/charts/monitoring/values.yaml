@@ -1210,7 +1210,7 @@ prometheus:
             module: [http_2xx]
           static_configs:
             - targets:
-              - 192.168.8.204:9234
+              - 192.168.1.234:9234
     #   relabel_configs:
     #     - source_labels: [__address__]
     #       target_label: __param_target

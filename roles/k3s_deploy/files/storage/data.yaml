@@ -261,3 +261,69 @@ spec:
     selector:
         matchLabels:
             mediatype: data-nodered
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nfs-data-nextcloud
+    labels:
+        mediatype: data-nextcloud
+spec:
+    capacity:
+        storage: 1Gi # This size is used to match a volume to a tenents claim
+    storageClassName: manual
+    accessModes:
+        - ReadWriteOnce # Access modes are defined below
+    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below
+    nfs:
+        server: 192.168.1.252
+        path: /volume1/data/nextcloud # Please change this to the relevant share
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nfs-data-nextcloud-claim
+    namespace: default
+spec:
+    accessModes:
+        - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+    storageClassName: manual
+    resources:
+        requests:
+            storage: 1Gi # volume size requested
+    selector:
+        matchLabels:
+            mediatype: data-nextcloud
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: nfs-data-github
+    labels:
+        mediatype: data-github
+spec:
+    capacity:
+        storage: 1Gi # This size is used to match a volume to a tenents claim
+    storageClassName: manual
+    accessModes:
+        - ReadWriteOnce # Access modes are defined below
+    persistentVolumeReclaimPolicy: Retain # Reclaim policies are defined below
+    nfs:
+        server: 192.168.1.252
+        path: /volume1/data/github # Please change this to the relevant share
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: nfs-data-github-claim
+    namespace: default
+spec:
+    accessModes:
+        - ReadWriteOnce # Access modes for volumes is defined under Persistent Volumes
+    storageClassName: manual
+    resources:
+        requests:
+            storage: 1Gi # volume size requested
+    selector:
+        matchLabels:
+            mediatype: data-github

@@ -1,6 +1,6 @@
 helmfiles:
 - path: charts/media/helmfile.yaml
-- path: charts/fantasyfootball/helmfile.yaml
+# - path: charts/fantasyfootball/helmfile.yaml
 - path: charts/default/helmfile.yaml
 - path: charts/homeauto/helmfile.yaml
 - path: charts/monitoring/helmfile.yaml

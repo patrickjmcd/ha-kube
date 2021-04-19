@@ -6,7 +6,7 @@
 #     pullPolicy: Always
 
 # config_ui_port: 8888
-# loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
+# loadbalancer_ip: 192.168.1.231 # IP Address used to define the loadbalancer service
 
 # env:
 #     - name: UID
@@ -94,9 +94,9 @@ service:
   type: LoadBalancer
   homebridgePort: 51827
   httpPort: 8888
-  loadBalancerIP: 192.168.8.201
+  loadBalancerIP: 192.168.1.231
   externalIPs: 
-    - 192.168.8.201
+    - 192.168.1.231
 
 
 ingress:

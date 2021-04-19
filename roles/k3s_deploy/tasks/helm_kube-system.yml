@@ -29,7 +29,7 @@
           - name: default
             protocol: layer2
             addresses:
-              - 192.168.8.200-192.168.8.210
+              - 192.168.1.230-192.168.1.240
 
 - name: Install ingress-nginx helm chart
   ignore_errors: yes # needed to keep going

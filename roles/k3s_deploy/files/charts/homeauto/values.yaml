@@ -7,7 +7,7 @@ homebridge:
         pullPolicy: Always
 
     config_ui_port: 8888
-    loadbalancer_ip: 192.168.8.201 # IP Address used to define the loadbalancer service
+    loadbalancer_ip: 192.168.1.231 # IP Address used to define the loadbalancer service
 
     env:
         - name: UID
@@ -223,7 +223,7 @@ mosquitto:
         port: 1883
         websocketPort: 9001
         annotations: {}
-        loadBalancerIP: 192.168.8.204
+        loadBalancerIP: 192.168.1.234
 
     resources:
         limits:

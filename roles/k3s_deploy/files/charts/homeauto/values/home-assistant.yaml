@@ -5,12 +5,19 @@ image:
     pullPolicy: IfNotPresent
     tag: 2020.12.1
 
+# Enable devices to be discoverable
+hostNetwork: true
+
+# When hostNetwork is true set dnsPolicy to ClusterFirstWithHostNet
+dnsPolicy: ClusterFirstWithHostNet
+
 # Enable a prometheus-operator servicemonitor
 prometheus:
     serviceMonitor:
         enabled: false
     # interval: 1m
     # additionalLabels: {}
+
 
 persistence:
     config:

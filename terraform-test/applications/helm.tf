@@ -16,7 +16,7 @@ resource "helm_release" "helm-metallb" {
 
   set {
       name = "configInline.address-pools[0].addresses[0]"
-      value = "192.168.8.200-192.168.8.210"
+      value = "192.168.1.230-192.168.8.210"
   }
 
 }

@@ -1,12 +1,12 @@
 [k3s_firstnode]
-kube00 ansible_host=192.168.8.100
+kube00 ansible_host=192.168.1.10
 
 [k3s_firstnode:vars]
 ansible_ssh_user=pi
 
 [k3s_servers]
-kube01 ansible_host=192.168.8.101
-kube02 ansible_host=192.168.8.102
+kube01 ansible_host=192.168.1.11
+kube02 ansible_host=192.168.1.12
 
 [k3s_servers:vars]
 ansible_ssh_user=pi
