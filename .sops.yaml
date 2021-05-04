@@ -1,2 +1,6 @@
+---
 creation_rules:
-  - kms: arn:aws:kms:us-east-2:724072041727:key/49d9739a-3d51-4ecb-a927-c7793472afde
+- encrypted_regex: '^(data|stringData)$'
+  pgp: >-
+    887C723034ACAF08FF2D784652C0A585461F63E0,
+    2D987F840D597EE7F92F90FAB9FB5202010E4216
