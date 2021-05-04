@@ -24,6 +24,18 @@ persistence:
         enabled: true
         emptyDir: false
         existingClaim: "nfs-config-homeassistant-claim"
+    movies:
+        enabled: true
+        emptyDir: false
+        existingClaim: "nfs-hamedia-movies-claim"
+    tv:
+        enabled: true
+        emptyDir: false
+        existingClaim: "nfs-hamedia-tv-claim"
+    music:
+        enabled: true
+        emptyDir: false
+        existingClaim: "nfs-hamedia-music-claim"
 
 ingress:
     enabled: true
@@ -44,6 +56,8 @@ ingress:
 addons:
     codeserver:
         enabled: true
+        image:
+            tag: 3.9.0
         volumeMounts:
             - name: config
               mountPath: /config
@@ -64,3 +78,13 @@ addons:
                 - secretName: code-homeassistant-prod-tls
                   hosts:
                       - code-ha.pmcd.io
+    
+    promtail:
+        enabled: true
+        loki: "loki-stack.monitoring.svc:3100"
+        volumeMounts: 
+            - name: config
+              mountPath: /config
+              readOnly: true
+
+

@@ -58,3 +58,9 @@ releases:
     chart: patrickjmcd/code-server
     values:
       - values/code-server.yaml
+
+  - name: notea
+    namespace: default
+    chart: patrickjmcd/notea
+    values:
+      - values/notea.yaml

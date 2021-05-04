@@ -2,7 +2,7 @@
 image:
     repository: nodered/node-red
     pullPolicy: IfNotPresent
-    tag: 1.2.5
+    # tag: 1.2.5
 
 strategy:
     type: Recreate
@@ -22,7 +22,7 @@ service:
 
 persistence:
     data:
-        enabled: false
+        enabled: true
         emptyDir: false
         mountPath: /data
         existingClaim: nfs-data-nodered-claim

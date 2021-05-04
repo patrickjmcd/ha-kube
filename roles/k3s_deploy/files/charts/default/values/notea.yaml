@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+    repository: cinwell/notea
+    tag: latest
+    pullPolicy: IfNotPresent
+
+# store_secret_name should specify a secret with properties:
+# store-access-key
+# store-secret-key
+# store-bucket
+# store-region
+# password
+store_secret_name: notea-secret
+
+service:
+    type: ClusterIP
+    port: 3000
+
+ingress:
+    enabled: true
+    annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+        nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
+    path: /
+    hosts:
+        - notes.pmcd.io
+    tls:
+        - secretName: "notea-prod-tls"
+          hosts:
+              - notes.pmcd.io
+
+resources:
+    requests:
+        memory: 128Mi
+        cpu: 0.1
+    limits:
+        memory: 256Mi
+        cpu: 0.5
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

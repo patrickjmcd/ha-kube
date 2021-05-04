@@ -178,26 +178,26 @@ nginx:
   resources: {}
 
 internalDatabase:
-  enabled: true
+  enabled: false
   name: nextcloud
 
 ##
 ## External database configuration
 ##
 externalDatabase:
-  enabled: false
+  enabled: true
 
   ## Supported database engines: mysql or postgresql
-  type: mysql
+  type: postgresql
 
   ## Database host
-  host:
+  host: postgresql.default/svc
 
   ## Database user
   user: nextcloud
 
   ## Database password
-  password:
+  password: nextcloud
 
   ## Database name
   database: nextcloud

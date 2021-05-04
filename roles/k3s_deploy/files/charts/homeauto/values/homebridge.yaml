@@ -82,15 +82,16 @@ timezone: "America/Chicago"
 puid: 1026
 pgid: 100
 
-config:
-  enableUI: true
 
-extraEnvs: 
-    - name: HOMEBRIDGE_INSECURE
-      value: "1"
+env: 
+  HOMEBRIDGE_INSECURE: 1
+  HOMEBRIDGE_CONFIG_UI: 1
+  HOMEBRIDGE_CONFIG_UI_PORT: 8888
 
 service:
   # -- Kubernetes service type for the homebridge GUI
+  port:
+    port: 8888
   type: LoadBalancer
   homebridgePort: 51827
   httpPort: 8888
@@ -98,28 +99,33 @@ service:
   externalIPs: 
     - 192.168.1.231
 
-
 ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod" # Encrypt using the ClusterIssuer deployed while setting up Cert-Manager
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m" # Increase the size of the maximum allowed size of the client request body
     nginx.ingress.kubernetes.io/auth-url: "https://sso.pmcd.io/oauth2/auth"
     nginx.ingress.kubernetes.io/auth-signin: "https://sso.pmcd.io/oauth2/start?rd=https://$host$request_uri"
-  path: /
   hosts:
-    - homebridge.pmcd.io
+    - host: homebridge.pmcd.io
+      paths:
+        - path: /
+          # Ignored if not kubeVersion >= 1.14-0
+          pathType: Prefix
   tls:
     - secretName: homebridge-prod-tls
       hosts:
         - homebridge.pmcd.io
 
+
 # -- Enable hostNetwork - needed for discovery to work
 hostNetwork: true
 
 persistence:
-  existingClaim: nfs-config-homebridge-claim
+  config:
+    enabled: true
+    existingClaim: nfs-config-homebridge-claim
 
 
 probes:
